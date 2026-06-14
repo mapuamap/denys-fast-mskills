@@ -1,6 +1,6 @@
 # 09 — Verification checklist (completion oracle)
 
-> **This file decides "done".** Each item is binary: ✓ or ✗. Empty `[ ]` = not done. **Never delete an item to make the list pass.**
+> **This file decides "done".** Each item is binary: ✓ or ✗. Empty `[ ]` = not done. **Never delete a row to make it pass.** A row whose concept is genuinely N/A for this task (e.g. no DB → `V-IMPL-04`) may be removed; one that simply doesn't apply yet stays `[~]` with a one-line reason.
 
 Status legend: `[ ]` open · `[x]` done · `[!]` blocked (must list blocker) · `[~]` skipped (must list reason)
 

@@ -340,7 +340,7 @@ footer{border-top:1px solid var(--border);padding:34px 0;margin-top:48px;color:v
     </div>
 
     <div class="metarow">
-      <span class="badge"><svg data-lucide="layers"></svg><span class="num">5</span> <span data-i18n="b_skills">скилов</span></span>
+      <span class="badge"><svg data-lucide="layers"></svg><span class="num">6</span> <span data-i18n="b_skills">скилов</span></span>
       <span class="badge"><svg data-lucide="terminal"></svg><span class="num">8</span> <span data-i18n="b_commands">команд</span></span>
       <span class="badge"><svg data-lucide="bot"></svg><span class="num">3</span> <span data-i18n="b_agents">агента</span></span>
       <span class="badge"><svg data-lucide="git-branch"></svg><span class="num">v2.0.0</span></span>
@@ -408,6 +408,9 @@ var DATA=[
   {kind:'skill',cat:'plan',icon:'circle-play',cmd:'/m_plan_implement',
    en:{tag:'Execute an existing plan',desc:'Finishes a plan from m_plan with a real deploy + smoke gate, then reports Done / Changed / Not-done.'},
    ru:{tag:'Выполнить готовый план',desc:'Доводит план от m_plan до конца с реальным деплоем и smoke-проверкой, затем отчёт Сделано / Изменено / Не сделано.'}},
+  {kind:'skill',cat:'plan',icon:'zap',cmd:'/m_plan_roll',
+   en:{tag:'Autonomous full-send',desc:'Plan large + implement + deploy + verify, no questions — records its assumptions and still never fakes a check. Claude Code only.'},
+   ru:{tag:'Автономный full-send',desc:'План large + реализация + деплой + проверка без вопросов — фиксирует допущения, проверки не подделывает. Только Claude Code.'}},
   {kind:'skill',cat:'code',icon:'package-plus',cmd:'/m_code_init_project',
    en:{tag:'Make a repo AI-ready',desc:'Sets up CLAUDE.md, architecture boundaries, seams and first tests so a repo is safe for AI work.'},
    ru:{tag:'Подготовить репозиторий к AI',desc:'Готовит CLAUDE.md, границы архитектуры, швы и первые тесты — чтобы репозиторий был безопасен для AI.'}},

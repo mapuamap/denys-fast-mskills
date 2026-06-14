@@ -48,6 +48,7 @@ Installed globally with the plugin. `m_plan` / `m_plan_implement` can be invoked
 |-------|---------|
 | **m_plan** | Plan → execute → verify pipeline. Asks blocker questions once, right-sizes the artifact set (tiny/small/medium/large), writes plans under `.m_plan/<slug>/`, then walks them step-by-step. "Done" is decided by `09_verification.md`, not by vibes. |
 | **m_plan_implement** | Executes an existing `.m_plan/<slug>/` plan, enforces a real-environment deploy/smoke gate, updates verification, and reports Done / Changed / Not done. |
+| **m_plan_roll** | Autonomous "full send": plans at large scope and implements with **no questions** — chains `m_plan` → `m_plan_implement`, records its assumptions, and still never fakes a check. Claude Code only. |
 | **m_code_init_project** | Bootstrap / harden a project for AI-assisted development (CLAUDE.md, rules, seams, first tests). |
 | **m_code_refactor** | Safe refactoring / restructuring in small verified slices. Modes: `preserve` (behavior-preserving legacy work) or `may-change` (architecture improvement). |
 | **m_code_rules_audit** | Audit code against the project's own rules and checks (complements `/code-review`). |
@@ -89,7 +90,7 @@ The three `m_code_*` skills and three agents are global (they come with the plug
 ```
 denys-fast-mskills/
 ├── .claude-plugin/        plugin.json + marketplace.json
-├── skills/                5 skills (m_plan, m_plan_implement, 3x m_code)
+├── skills/                6 skills (m_plan, m_plan_implement, m_plan_roll, 3x m_code)
 ├── commands/              8 commands
 ├── agents/                3 m_code agents
 └── m_code_framework/      payload /m_setup installs into a target project

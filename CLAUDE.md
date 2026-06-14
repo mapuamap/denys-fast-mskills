@@ -10,7 +10,7 @@ You are working on **denys-fast-mskills**, a public Claude Code **plugin** that 
 
 | Kind | Items |
 |------|-------|
-| **Skills** (`skills/`) | `m_plan`, `m_plan_implement`, `m_code_init_project`, `m_code_refactor`, `m_code_rules_audit` |
+| **Skills** (`skills/`) | `m_plan`, `m_plan_implement`, `m_plan_roll`, `m_code_init_project`, `m_code_refactor`, `m_code_rules_audit` |
 | **Commands** (`commands/`) | `m_setup`, `m_infr_init`, `m_infr`, `m_deploy_init`, `m_deploy_check`, `m_deploy`, `m_playwright_fulltest`, `m_explain` |
 | **Agents** (`agents/`) | `m_code_architecture_reviewer`, `m_code_context_scout`, `m_code_test_runner` |
 | **Payload** (`m_code_framework/`) | rules, hooks, `scripts/ai-check.sh`, `AI_INVARIANTS.md`, `settings*.json`, `README-hooks.md`, self-locating `install.sh`. This is NOT auto-loaded — `/m_setup` copies it into a target project's `.claude/`. |

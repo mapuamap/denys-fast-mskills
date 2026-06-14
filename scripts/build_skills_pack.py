@@ -22,6 +22,9 @@ import zipfile
 
 SKILLS_DIR = "skills"
 OUT_DIR = os.path.join("docs", "skills-pack")
+# Skills that only make sense in Claude Code (autonomous orchestration + execution +
+# deploy) and should NOT ship as Desktop/web skill uploads:
+SKIP = {"m_plan_roll"}
 STRIP_RE = re.compile(r"(?m)^disable-model-invocation:\s*true[ \t]*\r?\n")
 
 
@@ -33,6 +36,8 @@ def build():
 
     built = []
     for name in sorted(os.listdir(SKILLS_DIR)):
+        if name in SKIP:
+            continue
         sdir = os.path.join(SKILLS_DIR, name)
         if not os.path.isfile(os.path.join(sdir, "SKILL.md")):
             continue
