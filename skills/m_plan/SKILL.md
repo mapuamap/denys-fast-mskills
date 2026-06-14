@@ -21,7 +21,7 @@ Plan → execute → verify. Right-sizes the plan to the task, runs blocker ques
    - **large** (touches infra, migrations, or external contracts) → all 9.
    Skipped artifacts are **not written** — `09_verification.md` only lists sections for files that exist.
 
-3. **Compose blocker questions** from `BLOCKERS.md`. Pick only those whose answer is not obvious from the scan. **Include the size confirmation as one of the questions** (preset the agent's pre-classification as the recommended option). Ask via `AskUserQuestion` in batches of up to 4 (if that tool is unavailable in this harness, ask in chat as one numbered list with lettered options + a recommended default, then stop and wait). Aim for ONE batch. Open a second batch only if a first answer surfaces a new blocker.
+3. **Compose blocker questions** from `BLOCKERS.md`. Pick only those whose answer is not obvious from the scan. **Include the size confirmation as one of the questions** (preset the agent's pre-classification as the recommended option). Ask via `AskUserQuestion` in batches of up to 4 (if that tool is unavailable in this harness, ask in chat as one numbered list with lettered options + a recommended default, then stop and wait). Aim for ONE batch. Open a second batch only if a first answer surfaces a new blocker. **If the task touches a browser-observable surface (web page, UI, served app), include the `Browser / UI verification` questions — whether to verify in a real browser, which browser MCP is available, the URL, and login/credentials. If you're unsure whether browser testing is wanted, ask; don't assume.**
 
 4. **Pick a kebab-case slug** (max 40 chars). Echo: `Slug: <slug>. Size: <tiny|small|medium|large>. Will write: <list>.`
 

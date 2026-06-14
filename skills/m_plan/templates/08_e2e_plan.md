@@ -10,8 +10,10 @@
 - External services in scope: <real / sandbox / stubbed — name each>
 
 ## Harness
-- Tool: <Playwright MCP / k6 / curl / manual>
-- Auth method for runs: <…>
+- Browser tool (for UI checks): <Playwright MCP / Chrome MCP / macOS computer-use / none — name what to enable>
+- Other tools: <k6 / curl / manual>
+- **Access preflight (confirm BEFORE running any browser check):** target URL reachable from here · login required? · test credentials / session available (source; never inline) · network / VPN / allowlist in place.
+- If access can't be confirmed (login needed but no creds, URL unreachable, no browser MCP): **stop and ask — never fake a pass or silently skip the browser check.**
 - Artifacts (traces / screenshots): <where saved>
 
 ## Smoke (post-deploy minimum)

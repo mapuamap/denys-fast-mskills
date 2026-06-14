@@ -43,6 +43,14 @@ Draw from this list in Phase 0. Always select the questions that *actually* appl
 - Are there existing fixtures / fakes for the affected modules?
 - Acceptable to mock the DB, or must integration hit a real DB?
 
+## Browser / UI verification
+> Ask when the task adds or changes a browser-observable surface (web page, UI, served app). If unsure whether browser testing is wanted, ask — don't assume.
+- Verify the UI in a real browser, or do unit/integration tests cover it? (browser via MCP / no)
+- Which browser tool is available here — Playwright MCP, Chrome MCP, or (macOS) computer-use? If none, name what to enable.
+- Which URL / environment is verified (local / staging / prod)?
+- Does the surface require login/auth? If yes, are test credentials or a session available, and from where? (never hardcode real creds into artifacts)
+- Any network / VPN / allowlist needed to reach it?
+
 ## Deploy
 - CI auto-deploy on merge, or manual trigger?
 - Who approves the deploy? You alone or another reviewer?

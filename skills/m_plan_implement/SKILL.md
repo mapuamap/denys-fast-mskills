@@ -37,12 +37,18 @@ Follow-up to `m_plan`. Reads existing artifacts, drives them to completion. No r
    - If the plan claims "no deploy needed", verify that from artifacts and project type. For a deployable runtime, convert that to a blocker/deviation and ask for or infer the real deploy path.
    - If the target is production or a shared running service, apply the repo/user destructive-action policy before restarts, migrations, replacing containers, data changes, or reboots.
 
+7. **Browser verification preflight.** If `08_e2e_plan.md` has browser/UI checks (or the task changed a served UI), confirm you can actually run them before you start:
+   - A **browser MCP is available** — Playwright MCP or Chrome MCP (on macOS without one, computer-use). If none is available, say so and ask the user to enable one; never invent browser results.
+   - The **target URL is reachable** from here (VPN / allowlist in place).
+   - If the surface needs **login**, test credentials or a session are available (from the env / user, never hardcoded).
+   - If you're unsure whether browser verification is wanted, **ask**. If you can't access it (no MCP, unreachable, login without creds), **stop and ask, or mark the `V-E2E-*` rows `[!]` blocked** — never fake a pass or silently skip.
+
 ## Phase B — Execute (default: direct walk)
 
 Walk `05_step_plan.md` step by step:
 - Respect dependency order. After each step's per-step check passes, flip its `V-STEP-Sxx` to `[x]` via `Edit`.
 - On failing check: diagnose, retry **once**. Second failure → `[!]` blocker, stop, jump to Phase C.
-- After all steps: local preflight build/test (delegate noisy runs to the `m_code-test-runner` agent, keep only the summary) → (if `08` exists) e2e against the intended target when possible → real deploy → post-deploy smoke from outside or on the target host.
+- After all steps: local preflight build/test (delegate noisy runs to the `m_code-test-runner` agent, keep only the summary) → (if `08` exists) e2e against the intended target when possible — run browser/UI checks through the available browser MCP (Playwright/Chrome, or macOS computer-use) only after the Phase A §7 access preflight passes → real deploy → post-deploy smoke from outside or on the target host.
 - Update other `V-*` rows as their evidence appears in the transcript.
 
 **Deviation logging (mandatory).** Any time the run drifts from `01–08`, append a one-line entry under `## Deviations` in `09_verification.md` **immediately** — do not wait for Phase C. A deviation is any of:
