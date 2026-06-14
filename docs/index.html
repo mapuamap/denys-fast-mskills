@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@1,800&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Oxanium:wght@600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="logo.css" />
 <script>
   try {
     var t = localStorage.getItem('df-theme');
@@ -85,11 +86,14 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 2px var(--bg)
 /* ===== header ===== */
 header{position:sticky;top:0;z-index:1100;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--border);}
 .hbar{display:flex;align-items:center;gap:16px;height:62px;}
-.brand{display:flex;align-items:center;gap:11px;}
-.mark{height:25px;width:auto;display:block;}
-.mark .ln{fill:var(--primary);}.mark .cv-back{stroke:var(--primary);}.mark .cv-front{stroke:var(--text);}
+.brand{display:flex;align-items:center;gap:10px;}
 .wordmark{font-family:var(--font-brand);font-style:italic;font-weight:800;font-size:20px;letter-spacing:-.01em;line-height:1;white-space:nowrap;}
 .wordmark .svc{color:var(--primary);}.wordmark .dom{color:var(--text);}
+/* real brand logo component (logo.css / logo.js) */
+.logo-mini{--df-scale:.135;}
+.logo-mini .word{display:none;}
+footer .logo-mini{--df-scale:.115;}
+.hero-logo{--df-scale:.52;--df-font:30px;margin-bottom:6px;}
 nav.links{display:flex;gap:4px;margin-left:auto;}
 nav.links a{font-size:14px;font-weight:500;color:var(--text-secondary);padding:8px 12px;border-radius:var(--radius-md);transition:color var(--dur-fast),background var(--dur-fast);}
 nav.links a:hover{color:var(--text);background:var(--surface);}
@@ -107,10 +111,9 @@ nav.links a:hover{color:var(--text);background:var(--surface);}
 .gh svg{width:18px;height:18px;}
 
 /* ===== hero ===== */
-.hero{position:relative;overflow:hidden;padding:64px 0 40px;}
+.hero{position:relative;overflow:hidden;padding:54px 0 40px;}
 .hero::before{content:"";position:absolute;inset:0;z-index:0;opacity:.10;pointer-events:none;background:radial-gradient(560px 300px at 80% -10%,var(--primary),transparent 70%),radial-gradient(460px 260px at 10% 6%,var(--accent),transparent 72%);}
-.hero .wrap{position:relative;z-index:1;}
-.hero-mark{position:absolute;right:-44px;top:46%;transform:translateY(-50%);height:280px;opacity:.06;z-index:0;pointer-events:none;}
+.hero .wrap{position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center;}
 .overline{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--primary);display:inline-flex;align-items:center;gap:8px;}
 .overline::before{content:"›";font-weight:800;font-size:15px;}
 .hero h1{font-size:clamp(32px,5vw,52px);line-height:1.06;letter-spacing:-.02em;font-weight:700;margin:16px 0 0;max-width:17ch;}
@@ -119,7 +122,7 @@ nav.links a:hover{color:var(--text);background:var(--surface);}
 
 /* install box (top) */
 .install{margin-top:26px;max-width:600px;}
-.install-label{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;}
+.install-label{display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;}
 .install-label svg{width:15px;height:15px;color:var(--primary);}
 .install-cmd{display:flex;align-items:stretch;background:var(--surface-elevated);border:1px solid var(--border-strong);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-md);}
 .install-cmd code{flex:1;min-width:0;padding:13px 16px;font-size:13px;line-height:1.85;color:var(--text);white-space:pre;overflow-x:auto;}
@@ -131,7 +134,7 @@ nav.links a:hover{color:var(--text);background:var(--surface);}
 .install-hint{margin:9px 0 0;font-size:12.5px;color:var(--text-muted);}
 .install-hint code{font-size:12px;color:var(--text-secondary);}
 
-.metarow{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:24px;}
+.metarow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:9px;margin-top:24px;}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:var(--radius-full);background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);}
 .badge svg{width:14px;height:14px;color:var(--primary);}
 .badge .num{color:var(--text);}
@@ -205,13 +208,7 @@ footer{border-top:1px solid var(--border);padding:34px 0;margin-top:48px;color:v
 <header>
   <div class="wrap hbar">
     <a class="brand" href="#top" aria-label="mskills.denys.fast">
-      <svg class="mark" viewBox="0 0 442 166" aria-hidden="true">
-        <rect class="ln" x="41" y="47" width="231" height="22" rx="11"/>
-        <rect class="ln" x="0" y="72" width="298" height="22" rx="11"/>
-        <rect class="ln" x="21" y="97" width="253" height="22" rx="11"/>
-        <path class="cv-back" d="M256 18 L418 83 L256 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
-        <path class="cv-front" d="M182 18 L344 83 L182 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+      <span class="logo-mini" id="logoHeader" aria-hidden="true"></span>
       <span class="wordmark"><span class="svc">mskills</span><span class="dom">.denys.fast</span></span>
     </a>
     <nav class="links">
@@ -240,14 +237,8 @@ footer{border-top:1px solid var(--border);padding:34px 0;margin-top:48px;color:v
 
 <a id="top"></a>
 <section class="hero">
-  <svg class="hero-mark" viewBox="0 0 442 166" aria-hidden="true">
-    <rect class="ln" x="41" y="47" width="231" height="22" rx="11"/>
-    <rect class="ln" x="0" y="72" width="298" height="22" rx="11"/>
-    <rect class="ln" x="21" y="97" width="253" height="22" rx="11"/>
-    <path class="cv-back" d="M256 18 L418 83 L256 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
-    <path class="cv-front" d="M182 18 L344 83 L182 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
   <div class="wrap">
+    <div class="hero-logo" id="logoHero" aria-hidden="true"></div>
     <span class="overline" data-i18n="hero_over">Плагин для Claude Code</span>
     <h1 data-i18n="hero_title">Дисциплинированный <span class="grad">m_*</span>-набор для Claude</h1>
     <p class="sub" data-i18n="hero_sub">План → выполнение → проверка. Код, инфра, деплой и браузерные тесты — из одного плагина.</p>
@@ -278,13 +269,7 @@ footer{border-top:1px solid var(--border);padding:34px 0;margin-top:48px;color:v
   <div class="wrap">
     <div class="frow">
       <a class="brand" href="#top">
-        <svg class="mark" viewBox="0 0 442 166" aria-hidden="true">
-          <rect class="ln" x="41" y="47" width="231" height="22" rx="11"/>
-          <rect class="ln" x="0" y="72" width="298" height="22" rx="11"/>
-          <rect class="ln" x="21" y="97" width="253" height="22" rx="11"/>
-          <path class="cv-back" d="M256 18 L418 83 L256 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
-          <path class="cv-front" d="M182 18 L344 83 L182 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <span class="logo-mini" id="logoFooter" aria-hidden="true"></span>
         <span class="wordmark"><span class="svc">mskills</span><span class="dom">.denys.fast</span></span>
       </a>
       <div class="flinks">
@@ -297,6 +282,7 @@ footer{border-top:1px solid var(--border);padding:34px 0;margin-top:48px;color:v
 </footer>
 
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="logo.js"></script>
 <script>
 var CATS={plan:'var(--primary)',code:'var(--success)',infra:'var(--warning)',test:'var(--info)',agent:'var(--secondary)'};
 var DATA=[
@@ -443,7 +429,13 @@ document.addEventListener('click',function(ev){
 });
 document.querySelectorAll('[data-theme-set]').forEach(function(b){b.addEventListener('click',function(){setTheme(b.getAttribute('data-theme-set'));});});
 document.querySelectorAll('[data-lang-set]').forEach(function(b){b.addEventListener('click',function(){lang=b.getAttribute('data-lang-set');try{localStorage.setItem('df-lang',lang);}catch(e){}applyLang();});});
-(function(){var s='light';try{s=localStorage.getItem('df-theme')||'light';}catch(e){}setTheme(s);applyLang();})();
+(function(){var s='light';try{s=localStorage.getItem('df-theme')||'light';}catch(e){}setTheme(s);applyLang();
+  if(window.dfLogo){
+    try{dfLogo(document.getElementById('logoHeader'),{service:'mskills',state:'idle'});}catch(e){}
+    try{dfLogo(document.getElementById('logoFooter'),{service:'mskills',state:'idle'});}catch(e){}
+    try{var hero=dfLogo(document.getElementById('logoHero'),{service:'mskills',state:'idle'});hero.intro();}catch(e){}
+  }
+})();
 </script>
 </body>
 </html>
