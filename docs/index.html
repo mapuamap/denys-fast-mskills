@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>denys-fast-mskills — m_* toolkit for Claude Code</title>
+<meta name="description" content="A disciplined m_* toolkit for Claude Code: plan → execute → verify, code-quality skills, infra/deploy commands, and read-only review agents. Дисциплинированный m_*-набор для Claude Code." />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="denys-fast-mskills — m_* toolkit for Claude Code" />
+<meta property="og:description" content="Plan → execute → verify. Harden, refactor and audit code. Drive infra, deploy and browser tests — all from one installed plugin." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@1,800&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Oxanium:wght@600;700&display=swap" rel="stylesheet" />
+<script>
+  // Restore saved theme/lang before paint (no flash)
+  try {
+    var t = localStorage.getItem('df-theme');
+    if (t && t !== 'light') document.documentElement.setAttribute('data-theme', t);
+    var l = localStorage.getItem('df-lang');
+    if (l) document.documentElement.setAttribute('lang', l);
+  } catch (e) {}
+</script>
+<style>
+/* ============ denys.fast canonical tokens ============ */
+:root{
+  --font-brand:'Saira',system-ui,sans-serif;
+  --font-sans:'Geist',system-ui,-apple-system,sans-serif;
+  --font-mono:'Geist Mono',ui-monospace,'SFMono-Regular',monospace;
+  --font-num:'Oxanium','Saira',system-ui,sans-serif;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--radius-full:9999px;
+  --shadow-sm:0 1px 2px hsl(var(--shadow-color)/.08);
+  --shadow-md:0 4px 10px hsl(var(--shadow-color)/.10);
+  --shadow-lg:0 10px 24px hsl(var(--shadow-color)/.14);
+  --shadow-xl:0 20px 48px hsl(var(--shadow-color)/.18);
+  --dur-fast:100ms;--dur-base:200ms;--dur-slow:300ms;
+  --ease-out:cubic-bezier(.2,.8,.3,1);
+  --ease-spring:cubic-bezier(.34,1.4,.55,1);
+  /* Light (default) */
+  --bg:#FFFFFF;--surface:#F6F7F9;--surface-elevated:#FFFFFF;--surface-sunken:#EFF1F4;
+  --overlay:rgba(15,18,25,.45);--border:#E3E6EB;--border-strong:#D2D7DE;--divider:#EEF0F3;
+  --text:#14171F;--text-secondary:#515A67;--text-muted:#8A93A1;--text-inverse:#FFFFFF;--text-link:#4F46E5;
+  --primary:#5048E5;--primary-hover:#4038C8;--primary-active:#352DA8;--primary-soft:#ECEBFD;--on-primary:#FFFFFF;
+  --secondary:#7C3AED;--accent:#06B6D4;
+  --success:#16A34A;--success-soft:#E7F6EC;--warning:#D97706;--warning-soft:#FCF1E2;
+  --error:#DC2626;--info:#2563EB;--info-soft:#E8F0FE;
+  --focus-ring:rgba(80,72,229,.40);--shadow-color:220 25% 20%;--selection-bg:#D7D4FB;
+  --gradient-brand:linear-gradient(135deg,#5048E5,#06B6D4);
+}
+[data-theme="cream"]{
+  --bg:#F4EDE0;--surface:#FBF6EC;--surface-elevated:#FFFDF8;--surface-sunken:#EBE2D1;
+  --overlay:rgba(43,38,32,.40);--border:#E2D6C2;--border-strong:#D2C3A9;--divider:#EADFCC;
+  --text:#2B2620;--text-secondary:#6B6253;--text-muted:#9A8F7C;--text-inverse:#FBF6EC;--text-link:#BC5B2E;
+  --primary:#BC5B2E;--primary-hover:#A54D24;--primary-active:#8C401D;--primary-soft:#F4E2D4;--on-primary:#FFFDF8;
+  --secondary:#7A4FB0;--accent:#C2941B;
+  --success:#4D7C0F;--success-soft:#ECF1DF;--warning:#B45309;--warning-soft:#F7E9D7;
+  --error:#B4231D;--info:#2C5E8A;--info-soft:#E1EBF2;
+  --focus-ring:rgba(188,91,46,.40);--shadow-color:30 30% 25%;--selection-bg:#EAD3BE;
+  --gradient-brand:linear-gradient(135deg,#BC5B2E,#C2941B);
+}
+[data-theme="espresso"]{
+  --bg:#1A1410;--surface:#241C16;--surface-elevated:#2E251D;--surface-sunken:#130E0A;
+  --overlay:rgba(10,6,3,.60);--border:#3B2F25;--border-strong:#4D3E30;--divider:#2E251D;
+  --text:#F0E8DD;--text-secondary:#B8A693;--text-muted:#8A7A65;--text-inverse:#1A1410;--text-link:#E0853D;
+  --primary:#E0853D;--primary-hover:#EC9450;--primary-active:#C97231;--primary-soft:#2E2018;--on-primary:#1A1410;
+  --secondary:#C9A2F0;--accent:#93B84F;
+  --success:#93B84F;--success-soft:#1F2912;--warning:#E0A53D;--warning-soft:#2E2410;
+  --error:#E57363;--info:#6BA6C9;--info-soft:#14222B;
+  --focus-ring:rgba(224,133,61,.45);--shadow-color:25 40% 3%;--selection-bg:#4A3220;
+  --gradient-brand:linear-gradient(135deg,#E0853D,#C2941B);
+}
+[data-theme="obsidian"]{
+  --bg:#000000;--surface:#0D0D0F;--surface-elevated:#161618;--surface-sunken:#000000;
+  --overlay:rgba(0,0,0,.70);--border:#26262A;--border-strong:#38383D;--divider:#1C1C1F;
+  --text:#F4F4F5;--text-secondary:#A1A1AA;--text-muted:#71717A;--text-inverse:#000000;--text-link:#2DD4BF;
+  --primary:#2DD4BF;--primary-hover:#4EE0CE;--primary-active:#20B6A3;--primary-soft:#0A1E1B;--on-primary:#000000;
+  --secondary:#A78BFA;--accent:#FACC15;
+  --success:#34D399;--success-soft:#07241D;--warning:#FACC15;--warning-soft:#241E07;
+  --error:#FB7185;--info:#818CF8;--info-soft:#16162B;
+  --focus-ring:rgba(45,212,191,.50);--shadow-color:0 0% 0%;--selection-bg:#14403A;
+  --gradient-brand:linear-gradient(135deg,#2DD4BF,#A78BFA);
+}
+::selection{background:var(--selection-bg);}
+
+/* ============ base ============ */
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:var(--font-sans);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  transition:background var(--dur-base) var(--ease-out),color var(--dur-base) var(--ease-out);
+}
+a{color:inherit;text-decoration:none;}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+code,.mono{font-family:var(--font-mono);}
+.num{font-family:var(--font-num);}
+
+/* focus: brand double-ring */
+a:focus-visible,button:focus-visible{
+  outline:none;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--primary);border-radius:var(--radius-md);
+}
+
+/* ============ header ============ */
+header{
+  position:sticky;top:0;z-index:1100;
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:saturate(140%) blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.hbar{display:flex;align-items:center;gap:16px;height:64px;}
+.brand{display:flex;align-items:center;gap:11px;}
+.mark{height:26px;width:auto;display:block;}
+.mark .ln{fill:var(--primary);}
+.mark .cv-back{stroke:var(--primary);}
+.mark .cv-front{stroke:var(--text);}
+.wordmark{font-family:var(--font-brand);font-style:italic;font-weight:800;font-size:20px;letter-spacing:-.01em;line-height:1;white-space:nowrap;}
+.wordmark .svc{color:var(--primary);}
+.wordmark .dom{color:var(--text);}
+nav.links{display:flex;gap:6px;margin-left:auto;}
+nav.links a{
+  font-size:14px;font-weight:500;color:var(--text-secondary);
+  padding:8px 12px;border-radius:var(--radius-md);transition:color var(--dur-fast),background var(--dur-fast);
+}
+nav.links a:hover{color:var(--text);background:var(--surface);}
+.tools{display:flex;align-items:center;gap:10px;margin-left:8px;}
+.swatches{display:flex;gap:6px;padding:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-full);}
+.sw{width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:transform var(--dur-fast) var(--ease-spring);}
+.sw:hover{transform:scale(1.15);}
+.sw[aria-pressed="true"]{border-color:var(--text);}
+.sw.light{background:#5048E5;}.sw.cream{background:#BC5B2E;}.sw.espresso{background:#E0853D;}.sw.obsidian{background:#2DD4BF;}
+.lang{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-full);overflow:hidden;}
+.lang button{
+  font-family:var(--font-sans);font-size:13px;font-weight:600;color:var(--text-muted);
+  background:transparent;border:0;padding:6px 11px;cursor:pointer;transition:color var(--dur-fast),background var(--dur-fast);
+}
+.lang button[aria-pressed="true"]{color:var(--on-primary);background:var(--primary);}
+.gh{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-md);color:var(--text-secondary);border:1px solid var(--border);transition:all var(--dur-fast);}
+.gh:hover{color:var(--text);border-color:var(--border-strong);background:var(--surface);}
+.gh svg{width:18px;height:18px;}
+
+/* ============ hero ============ */
+.hero{position:relative;overflow:hidden;padding:84px 0 64px;}
+.hero::before{
+  content:"";position:absolute;inset:0;z-index:0;opacity:.10;pointer-events:none;
+  background:
+    radial-gradient(620px 320px at 78% -8%,var(--primary),transparent 70%),
+    radial-gradient(520px 280px at 12% 8%,var(--accent),transparent 72%);
+}
+.hero .wrap{position:relative;z-index:1;}
+.overline{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--primary);display:inline-flex;align-items:center;gap:8px;}
+.overline::before{content:"›";font-weight:800;font-size:15px;}
+.hero h1{font-size:clamp(34px,5.4vw,56px);line-height:1.05;letter-spacing:-.02em;font-weight:700;margin:18px 0 0;max-width:18ch;}
+.hero h1 .grad{background:var(--gradient-brand);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p.sub{font-size:clamp(16px,2vw,19px);color:var(--text-secondary);max-width:62ch;margin:20px 0 0;line-height:1.6;}
+.badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;}
+.badge{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:7px 13px;border-radius:var(--radius-full);background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);}
+.badge svg{width:15px;height:15px;color:var(--primary);}
+.badge .num{color:var(--text);font-size:14px;}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px;}
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-sans);font-size:15px;font-weight:600;padding:12px 20px;border-radius:var(--radius-md);cursor:pointer;border:1px solid transparent;transition:transform var(--dur-fast) var(--ease-spring),background var(--dur-fast),box-shadow var(--dur-fast);}
+.btn svg{width:17px;height:17px;}
+.btn-primary{background:var(--primary);color:var(--on-primary);box-shadow:var(--shadow-md);}
+.btn-primary:hover{background:var(--primary-hover);transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.btn-primary:active{transform:scale(.97);}
+.btn-ghost{background:var(--surface-elevated);color:var(--text);border-color:var(--border-strong);}
+.btn-ghost:hover{background:var(--surface);transform:translateY(-2px);}
+.hero-mark{position:absolute;right:-40px;top:50%;transform:translateY(-50%);height:300px;opacity:.07;z-index:0;pointer-events:none;}
+
+/* ============ install one-liner in hero ============ */
+.cmdline{margin-top:24px;display:inline-flex;align-items:center;gap:12px;max-width:100%;
+  background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-md);
+  padding:11px 12px 11px 16px;box-shadow:var(--shadow-sm);overflow:hidden;}
+.cmdline code{font-size:13.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cmdline code .dim{color:var(--text-muted);}
+.copy{flex:none;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);font-size:12px;font-weight:600;
+  color:var(--text-secondary);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;cursor:pointer;transition:all var(--dur-fast);}
+.copy:hover{color:var(--text);border-color:var(--border-strong);}
+.copy svg{width:14px;height:14px;}
+.copy.ok{color:var(--success);border-color:var(--success);}
+
+/* ============ sections ============ */
+section.block{padding:56px 0;}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+.sec-ico{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:var(--radius-lg);background:var(--primary-soft);color:var(--primary);}
+.sec-ico svg{width:23px;height:23px;}
+.sec-head h2{font-size:clamp(24px,3.4vw,32px);letter-spacing:-.01em;margin:0;font-weight:700;}
+.sec-head .count{font-family:var(--font-num);font-weight:700;color:var(--text-muted);font-size:18px;margin-left:2px;}
+.sec-sub{color:var(--text-secondary);margin:0 0 28px 58px;font-size:15px;}
+
+/* ============ cards ============ */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px;}
+.card{
+  position:relative;overflow:hidden;background:var(--surface-elevated);
+  border:1px solid var(--border);border-radius:var(--radius-xl);padding:22px 22px 20px;
+  box-shadow:var(--shadow-sm);transition:transform var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out),border-color var(--dur-base);
+  --c:var(--primary);
+}
+.card::after{ /* speed-lines ornament */
+  content:"";position:absolute;top:18px;right:-8px;width:46px;height:14px;opacity:.5;pointer-events:none;
+  background:linear-gradient(var(--c),var(--c)) 100% 0/30px 2px no-repeat,
+            linear-gradient(var(--c),var(--c)) 100% 6px/42px 2px no-repeat,
+            linear-gradient(var(--c),var(--c)) 100% 12px/22px 2px no-repeat;
+  border-radius:2px;
+}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:color-mix(in srgb,var(--c) 45%,var(--border));}
+.card-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.card-ico{flex:none;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:var(--radius-md);
+  background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);}
+.card-ico svg{width:21px;height:21px;}
+.kind{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--c);background:color-mix(in srgb,var(--c) 13%,transparent);
+  padding:4px 9px;border-radius:var(--radius-full);transform:skewX(-8deg);}
+.kind span{display:inline-block;transform:skewX(8deg);}
+.cmd{font-family:var(--font-mono);font-size:15px;font-weight:500;color:var(--text);}
+.cmd .slash{color:var(--c);}
+.tag{font-weight:600;font-size:14px;color:var(--text);margin:9px 0 6px;}
+.desc{font-size:14px;color:var(--text-secondary);line-height:1.58;margin:0;}
+
+/* ============ two ways ============ */
+.ways{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px;}
+.way{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;overflow:hidden;}
+.way::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--primary));}
+.way h3{margin:0 0 8px;font-size:18px;display:flex;align-items:center;gap:9px;}
+.way h3 svg{width:18px;height:18px;color:var(--c,var(--primary));}
+.way p{margin:0;color:var(--text-secondary);font-size:14.5px;}
+
+/* ============ install ============ */
+.steps{counter-reset:s;display:grid;gap:16px;margin-top:8px;}
+.step{position:relative;background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 20px 20px 64px;}
+.step::before{counter-increment:s;content:counter(s);position:absolute;left:18px;top:18px;
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-num);font-weight:700;font-size:15px;color:var(--on-primary);background:var(--primary);border-radius:var(--radius-md);}
+.step h4{margin:2px 0 12px;font-size:16px;}
+.step .cmdline{margin-top:0;display:flex;width:100%;}
+.note{margin-top:16px;color:var(--text-muted);font-size:13.5px;display:flex;gap:8px;align-items:flex-start;}
+.note svg{width:16px;height:16px;flex:none;margin-top:2px;color:var(--text-muted);}
+
+/* ============ footer ============ */
+footer{border-top:1px solid var(--border);padding:40px 0;margin-top:32px;color:var(--text-muted);font-size:14px;}
+.frow{display:flex;flex-wrap:wrap;align-items:center;gap:16px;}
+.frow .brand{opacity:.9;}
+.flinks{margin-left:auto;display:flex;gap:18px;}
+.flinks a{color:var(--text-secondary);transition:color var(--dur-fast);}
+.flinks a:hover{color:var(--text);}
+.fmeta{margin-top:14px;font-size:13px;}
+.fmeta .num{color:var(--text-secondary);}
+
+/* ============ reveal animation ============ */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .5s var(--ease-out),transform .5s var(--ease-out);transition-delay:var(--d,0ms);}
+.reveal.in{opacity:1;transform:none;}
+
+/* ============ responsive ============ */
+@media(max-width:860px){
+  nav.links{display:none;}
+  .ways{grid-template-columns:1fr;}
+  .hero{padding:60px 0 48px;}
+}
+@media(max-width:560px){
+  .wordmark{font-size:17px;}
+  .tools{gap:7px;}
+  .swatches{display:none;}
+  .grid{grid-template-columns:1fr;}
+  .badge .lbl-long{display:none;}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+  .reveal{opacity:1;transform:none;}
+  html{scroll-behavior:auto;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hbar">
+    <a class="brand" href="#top" aria-label="mskills.denys.fast">
+      <svg class="mark" viewBox="0 0 442 166" aria-hidden="true">
+        <rect class="ln" x="41" y="47" width="231" height="22" rx="11"/>
+        <rect class="ln" x="0"  y="72" width="298" height="22" rx="11"/>
+        <rect class="ln" x="21" y="97" width="253" height="22" rx="11"/>
+        <path class="cv-back"  d="M256 18 L418 83 L256 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="cv-front" d="M182 18 L344 83 L182 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="wordmark"><span class="svc">mskills</span><span class="dom">.denys.fast</span></span>
+    </a>
+    <nav class="links">
+      <a href="#skills" data-i18n="nav_skills">Скилы</a>
+      <a href="#commands" data-i18n="nav_commands">Команды</a>
+      <a href="#agents" data-i18n="nav_agents">Агенты</a>
+      <a href="#install" data-i18n="nav_install">Установка</a>
+    </nav>
+    <div class="tools">
+      <div class="swatches" role="group" aria-label="Theme">
+        <button class="sw light"    data-theme-set="light"    aria-label="Light" aria-pressed="true"></button>
+        <button class="sw cream"    data-theme-set="cream"    aria-label="Cream" aria-pressed="false"></button>
+        <button class="sw espresso" data-theme-set="espresso" aria-label="Espresso" aria-pressed="false"></button>
+        <button class="sw obsidian" data-theme-set="obsidian" aria-label="Obsidian" aria-pressed="false"></button>
+      </div>
+      <div class="lang" role="group" aria-label="Language">
+        <button data-lang-set="ru" aria-pressed="true">RU</button>
+        <button data-lang-set="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="gh" href="https://github.com/mapuamap/denys-fast-mskills" target="_blank" rel="noopener" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.1 1.7 1.1 1 1.7 2.6 1.2 3.3.9.1-.7.4-1.2.7-1.5-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.1-3.1-.1-.3-.5-1.5.1-3.1 0 0 .9-.3 3 1.1.9-.2 1.8-.4 2.7-.4.9 0 1.8.1 2.7.4 2.1-1.4 3-1.1 3-1.1.6 1.6.2 2.8.1 3.1.7.8 1.1 1.8 1.1 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<a id="top"></a>
+<section class="hero">
+  <svg class="hero-mark" viewBox="0 0 442 166" aria-hidden="true">
+    <rect class="ln" x="41" y="47" width="231" height="22" rx="11"/>
+    <rect class="ln" x="0"  y="72" width="298" height="22" rx="11"/>
+    <rect class="ln" x="21" y="97" width="253" height="22" rx="11"/>
+    <path class="cv-back"  d="M256 18 L418 83 L256 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="cv-front" d="M182 18 L344 83 L182 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div class="wrap">
+    <span class="overline" data-i18n="hero_over">Плагин для Claude Code</span>
+    <h1 data-i18n="hero_title">Дисциплинированный <span class="grad">m_*</span>-набор, чтобы доводить софт до продакшна с Claude</h1>
+    <p class="sub" data-i18n="hero_sub">План → выполнение → проверка. Укрепляй, рефактори и аудируй код. Управляй инфрой, деплоем и браузерными тестами — из одного установленного плагина.</p>
+    <div class="badges">
+      <span class="badge"><svg data-lucide="layers"></svg><span class="num">5</span> <span data-i18n="b_skills">скилов</span></span>
+      <span class="badge"><svg data-lucide="terminal"></svg><span class="num">8</span> <span data-i18n="b_commands">команд</span></span>
+      <span class="badge"><svg data-lucide="bot"></svg><span class="num">3</span> <span data-i18n="b_agents">агента</span></span>
+      <span class="badge"><svg data-lucide="git-branch"></svg><span class="num">v2.0.0</span></span>
+      <span class="badge"><svg data-lucide="scale"></svg>Apache-2.0</span>
+    </div>
+    <div class="cta">
+      <a class="btn btn-primary" href="#install"><svg data-lucide="download"></svg><span data-i18n="cta_install">Установить</span></a>
+      <a class="btn btn-ghost" href="https://github.com/mapuamap/denys-fast-mskills" target="_blank" rel="noopener"><svg data-lucide="github"></svg><span data-i18n="cta_github">Открыть на GitHub</span></a>
+    </div>
+  </div>
+</section>
+
+<main class="wrap" id="content"><!-- sections injected here --></main>
+
+<section class="block wrap" id="ways-sec">
+  <div class="sec-head reveal">
+    <span class="sec-ico"><svg data-lucide="git-fork"></svg></span>
+    <h2 data-i18n="ways_title">Два способа планировать</h2>
+  </div>
+  <div class="ways">
+    <div class="way reveal" style="--c:var(--info)">
+      <h3><svg data-lucide="feather"></svg><span data-i18n="ways_light_t">Лёгкий</span></h3>
+      <p data-i18n="ways_light_d">Контекст в <code>infra.md</code> + <code>deploy.md</code>, управляется <code>/m_infr*</code> и <code>/m_deploy*</code>. Быстро, для устоявшихся проектов.</p>
+    </div>
+    <div class="way reveal" style="--c:var(--primary)">
+      <h3><svg data-lucide="list-checks"></svg><span data-i18n="ways_formal_t">Формальный</span></h3>
+      <p data-i18n="ways_formal_d">Конвейер артефактов <code>m_plan</code> с оракулом проверки (<code>09_verification.md</code>). Для крупных или рискованных изменений.</p>
+    </div>
+  </div>
+</section>
+
+<section class="block wrap" id="install">
+  <div class="sec-head reveal">
+    <span class="sec-ico"><svg data-lucide="download"></svg></span>
+    <h2 data-i18n="install_title">Установка</h2>
+  </div>
+  <div class="steps">
+    <div class="step reveal">
+      <h4 data-i18n="install_s1">Добавь маркетплейс</h4>
+      <div class="cmdline"><code>claude plugin marketplace add mapuamap/denys-fast-mskills</code><button class="copy" data-copy="claude plugin marketplace add mapuamap/denys-fast-mskills"><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button></div>
+    </div>
+    <div class="step reveal">
+      <h4 data-i18n="install_s2">Установи плагин</h4>
+      <div class="cmdline"><code>claude plugin install denys-fast-mskills@denys-fast-mskills</code><button class="copy" data-copy="claude plugin install denys-fast-mskills@denys-fast-mskills"><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button></div>
+    </div>
+    <div class="step reveal">
+      <h4 data-i18n="install_s3">Перезапусти Claude Code, затем…</h4>
+      <div class="cmdline"><code><span class="dim">$ </span>/m_setup<span class="dim">   ·   </span>/m_plan &lt;task&gt;</code><button class="copy" data-copy="/m_plan "><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button></div>
+    </div>
+  </div>
+  <p class="note"><svg data-lucide="info"></svg><span data-i18n="install_note">Внутри Claude Code можно также использовать команды <code>/plugin marketplace add</code> и <code>/plugin install</code>.</span></p>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="frow">
+      <a class="brand" href="#top">
+        <svg class="mark" viewBox="0 0 442 166" aria-hidden="true">
+          <rect class="ln" x="41" y="47" width="231" height="22" rx="11"/>
+          <rect class="ln" x="0" y="72" width="298" height="22" rx="11"/>
+          <rect class="ln" x="21" y="97" width="253" height="22" rx="11"/>
+          <path class="cv-back" d="M256 18 L418 83 L256 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+          <path class="cv-front" d="M182 18 L344 83 L182 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="wordmark"><span class="svc">mskills</span><span class="dom">.denys.fast</span></span>
+      </a>
+      <div class="flinks">
+        <a href="https://github.com/mapuamap/denys-fast-mskills" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/mapuamap/denys-fast-mskills/blob/main/LICENSE" target="_blank" rel="noopener">Apache-2.0</a>
+      </div>
+    </div>
+    <div class="fmeta"><span data-i18n="footer_made">Часть экосистемы denys.fast</span> · denys-fast-mskills <span class="num">v2.0.0</span> · © 2026 Denis</div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+/* ---------------- data ---------------- */
+var CATS = {
+  plan:  {color:'var(--primary)'},
+  code:  {color:'var(--success)'},
+  infra: {color:'var(--warning)'},
+  test:  {color:'var(--info)'},
+  agent: {color:'var(--secondary)'}
+};
+var DATA = [
+  // ---- skills ----
+  {kind:'skill', cat:'plan', icon:'clipboard-list', cmd:'/m_plan',
+   en:{tag:'Plan → execute → verify', desc:'Turns a task into a right-sized plan under .m_plan/, walks it step by step, and proves it is done against a verification checklist — not vibes. Picks tiny→large scope and asks the blocking questions up front.'},
+   ru:{tag:'План → выполнение → проверка', desc:'Превращает задачу в план нужного размера в .m_plan/, проходит его по шагам и доказывает готовность по чек-листу проверки, а не «на глаз». Сам выбирает масштаб tiny→large и задаёт блокеры заранее.'}},
+  {kind:'skill', cat:'plan', icon:'circle-play', cmd:'/m_plan_implement',
+   en:{tag:'Execute an existing plan', desc:'Picks up a plan made by m_plan and drives it to done — including a real-environment deploy & smoke gate (local checks never count as a release). Ends with a clear Done / Changed / Not-done report.'},
+   ru:{tag:'Выполнить готовый план', desc:'Берёт план от m_plan и доводит до конца — с деплоем и smoke-проверкой в реальной среде (локальные проверки релизом не считаются). В конце — чёткий отчёт Сделано / Изменено / Не сделано.'}},
+  {kind:'skill', cat:'code', icon:'package-plus', cmd:'/m_code_init_project',
+   en:{tag:'Make a repo AI-ready', desc:'Bootstraps or hardens a project for AI-assisted work: a concise CLAUDE.md, architecture boundaries, seams around DB/clock/network, deterministic check commands, and first behavior tests.'},
+   ru:{tag:'Подготовить репозиторий к AI', desc:'Поднимает или укрепляет проект под работу с AI: лаконичный CLAUDE.md, границы архитектуры, швы вокруг БД/времени/сети, детерминированные команды проверки и первые тесты на поведение.'}},
+  {kind:'skill', cat:'code', icon:'wrench', cmd:'/m_code_refactor',
+   en:{tag:'Refactor in safe slices', desc:'Restructures code in small, reviewable slices with a test safety net first. Two modes: preserve (no behavior change, for legacy) or may-change (architecture improvement). Justifies every abstraction.'},
+   ru:{tag:'Рефакторинг безопасными срезами', desc:'Перестраивает код маленькими проверяемыми срезами, сначала ставит тестовую сетку. Два режима: preserve (без смены поведения, для легаси) или may-change (улучшение архитектуры). Оправдывает каждую абстракцию.'}},
+  {kind:'skill', cat:'code', icon:'shield-check', cmd:'/m_code_rules_audit',
+   en:{tag:'Audit against your rules', desc:'Checks code against the rules that actually exist in your repo (CLAUDE.md, .claude/rules, configs, CI) plus safe deterministic checks. Report-only by default; complements /code-review, which is rule-agnostic.'},
+   ru:{tag:'Аудит по твоим правилам', desc:'Проверяет код по правилам, реально живущим в репозитории (CLAUDE.md, .claude/rules, конфиги, CI), плюс безопасные детерминированные проверки. По умолчанию только отчёт; дополняет /code-review, которому правила неизвестны.'}},
+  // ---- commands ----
+  {kind:'command', cat:'infra', icon:'settings-2', cmd:'/m_setup',
+   en:{tag:'Install the m_code framework', desc:'Lays the project-local enforcement scaffolding into the current repo: rules, hooks, scripts/ai-check.sh and settings. Run once per project.'},
+   ru:{tag:'Установить m_code-фреймворк', desc:'Кладёт в текущий репозиторий локальную обвязку контроля: правила, хуки, scripts/ai-check.sh и настройки. Запускается один раз на проект.'}},
+  {kind:'command', cat:'infra', icon:'server-cog', cmd:'/m_infr_init',
+   en:{tag:'Create infra.md', desc:'Captures your infrastructure — servers, compute, network, dependencies — into a single infra.md context file.'},
+   ru:{tag:'Создать infra.md', desc:'Фиксирует инфраструктуру — серверы, ресурсы, сеть, зависимости — в один контекст-файл infra.md.'}},
+  {kind:'command', cat:'infra', icon:'server', cmd:'/m_infr',
+   en:{tag:'Use infra context', desc:'Reads infra.md and applies that infrastructure context to the task at hand.'},
+   ru:{tag:'Использовать инфра-контекст', desc:'Читает infra.md и применяет инфраструктурный контекст к текущей задаче.'}},
+  {kind:'command', cat:'infra', icon:'file-cog', cmd:'/m_deploy_init',
+   en:{tag:'Create deploy.md', desc:'Writes a deploy.md describing how this project ships — targets, steps and rollback.'},
+   ru:{tag:'Создать deploy.md', desc:'Пишет deploy.md: как проект выкатывается — цели, шаги и откат.'}},
+  {kind:'command', cat:'infra', icon:'list-checks', cmd:'/m_deploy_check',
+   en:{tag:'Preflight the deploy', desc:'Reviews deploy.md and current state before shipping — a dry read of what would happen.'},
+   ru:{tag:'Префлайт деплоя', desc:'Просматривает deploy.md и текущее состояние перед выкаткой — сухой разбор, что произойдёт.'}},
+  {kind:'command', cat:'infra', icon:'rocket', cmd:'/m_deploy',
+   en:{tag:'Ship it', desc:'Runs the deploy from deploy.md and verifies the result — logger-mm-aware for post-deploy log checks.'},
+   ru:{tag:'Выкатить', desc:'Выполняет деплой по deploy.md и проверяет результат — умеет читать логи через logger-mm после выкатки.'}},
+  {kind:'command', cat:'test', icon:'bug', cmd:'/m_playwright_fulltest',
+   en:{tag:'Full browser test loop', desc:'End-to-end loop: plan → deploy → test in a real browser via Playwright MCP → fix → re-deploy, until it passes.'},
+   ru:{tag:'Полный браузерный прогон', desc:'Сквозной цикл: план → деплой → тест в реальном браузере через Playwright MCP → починка → передеплой, пока не пройдёт.'}},
+  {kind:'command', cat:'test', icon:'message-square', cmd:'/m_explain',
+   en:{tag:'Explain in plain language', desc:'Summarizes what was just done in plain, non-technical language — good for a handoff or a quick recap.'},
+   ru:{tag:'Объяснить по-человечески', desc:'Резюмирует, что только что сделано, простым нетехническим языком — удобно для передачи или быстрого пересказа.'}},
+  // ---- agents ----
+  {kind:'agent', cat:'agent', icon:'radar', cmd:'m_code_context_scout',
+   en:{tag:'Wide codebase scan', desc:'A read-only scout that maps a large or unfamiliar codebase in a separate context and returns a compact map — keeps file dumps out of the main chat.'},
+   ru:{tag:'Широкий скан кодовой базы', desc:'Read-only разведчик: в отдельном контексте картирует большую или незнакомую кодовую базу и возвращает компактную карту — не засоряет основной чат дампами файлов.'}},
+  {kind:'agent', cat:'agent', icon:'flask-conical', cmd:'m_code_test_runner',
+   en:{tag:'Run checks, return summary', desc:'Runs build/test/lint in an isolated context and returns only a concise pass/fail summary — so noisy output never floods the session.'},
+   ru:{tag:'Прогнать проверки, вернуть итог', desc:'Гоняет build/test/lint в изолированном контексте и возвращает только короткий итог pass/fail — шумный вывод не заливает сессию.'}},
+  {kind:'agent', cat:'agent', icon:'layers', cmd:'m_code_architecture_reviewer',
+   en:{tag:'Independent boundary review', desc:'A read-only reviewer for dependency direction, seams, coupling and AI-testability — a second pair of eyes after meaningful changes or before a big refactor.'},
+   ru:{tag:'Независимое ревью границ', desc:'Read-only ревьюер направления зависимостей, швов, связанности и тестопригодности — второй взгляд после значимых правок или перед крупным рефакторингом.'}}
+];
+
+var SECTIONS = [
+  {kind:'skill',   id:'skills',   icon:'layers',   en:{t:'Skills',   s:'Global workflows you invoke with a slash command.'}, ru:{t:'Скилы',   s:'Глобальные воркфлоу, вызываются слеш-командой.'}},
+  {kind:'command', id:'commands', icon:'terminal', en:{t:'Commands', s:'User-triggered commands for setup, infra, deploy and tests.'}, ru:{t:'Команды', s:'Пользовательские команды для сетапа, инфры, деплоя и тестов.'}},
+  {kind:'agent',   id:'agents',   icon:'bot',      en:{t:'Agents',   s:'Read-only helpers the skills delegate to, in isolated context.'}, ru:{t:'Агенты',   s:'Read-only помощники в изолированном контексте, к которым обращаются скилы.'}}
+];
+
+var I18N = {
+  ru:{nav_skills:'Скилы',nav_commands:'Команды',nav_agents:'Агенты',nav_install:'Установка',
+    hero_over:'Плагин для Claude Code',
+    hero_title:'Дисциплинированный <span class="grad">m_*</span>-набор, чтобы доводить софт до продакшна с Claude',
+    hero_sub:'План → выполнение → проверка. Укрепляй, рефактори и аудируй код. Управляй инфрой, деплоем и браузерными тестами — из одного установленного плагина.',
+    b_skills:'скилов',b_commands:'команд',b_agents:'агента',
+    cta_install:'Установить',cta_github:'Открыть на GitHub',
+    ways_title:'Два способа планировать',ways_light_t:'Лёгкий',
+    ways_light_d:'Контекст в <code>infra.md</code> + <code>deploy.md</code>, управляется <code>/m_infr*</code> и <code>/m_deploy*</code>. Быстро, для устоявшихся проектов.',
+    ways_formal_t:'Формальный',
+    ways_formal_d:'Конвейер артефактов <code>m_plan</code> с оракулом проверки (<code>09_verification.md</code>). Для крупных или рискованных изменений.',
+    install_title:'Установка',install_s1:'Добавь маркетплейс',install_s2:'Установи плагин',install_s3:'Перезапусти Claude Code, затем…',
+    install_note:'Внутри Claude Code можно также использовать команды <code>/plugin marketplace add</code> и <code>/plugin install</code>.',
+    footer_made:'Часть экосистемы denys.fast',copy:'Копировать',copied:'Скопировано',
+    kind_skill:'скил',kind_command:'команда',kind_agent:'агент'},
+  en:{nav_skills:'Skills',nav_commands:'Commands',nav_agents:'Agents',nav_install:'Install',
+    hero_over:'Claude Code plugin',
+    hero_title:'A disciplined <span class="grad">m_*</span> toolkit for shipping real software with Claude',
+    hero_sub:'Plan → execute → verify. Harden, refactor and audit code. Drive infra, deploy and browser tests — all from one installed plugin.',
+    b_skills:'skills',b_commands:'commands',b_agents:'agents',
+    cta_install:'Install',cta_github:'View on GitHub',
+    ways_title:'Two ways to plan',ways_light_t:'Lightweight',
+    ways_light_d:'<code>infra.md</code> + <code>deploy.md</code> context, driven by <code>/m_infr*</code> and <code>/m_deploy*</code>. Fast, for established projects.',
+    ways_formal_t:'Formal',
+    ways_formal_d:'The <code>m_plan</code> artifact pipeline with a verification oracle (<code>09_verification.md</code>). For substantial or risky changes.',
+    install_title:'Install',install_s1:'Add the marketplace',install_s2:'Install the plugin',install_s3:'Restart Claude Code, then…',
+    install_note:'Inside Claude Code you can also use the <code>/plugin marketplace add</code> and <code>/plugin install</code> commands.',
+    footer_made:'Part of the denys.fast ecosystem',copy:'Copy',copied:'Copied',
+    kind_skill:'skill',kind_command:'command',kind_agent:'agent'}
+};
+
+var lang = document.documentElement.getAttribute('lang') || 'ru';
+if (lang !== 'en' && lang !== 'ru') lang = 'ru';
+
+/* ---------------- render cards ---------------- */
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cardHTML(it){
+  var L=it[lang], c=CATS[it.cat].color;
+  var kindLabel=I18N[lang]['kind_'+it.kind];
+  var isSlash=it.kind!=='agent';
+  var cmd= isSlash
+    ? '<span class="slash">/</span>'+esc(it.cmd.slice(1))
+    : esc(it.cmd);
+  return '<article class="card reveal" style="--c:'+c+'">'+
+    '<div class="card-top">'+
+      '<span class="card-ico"><svg data-lucide="'+it.icon+'"></svg></span>'+
+      '<span class="kind"><span>'+kindLabel+'</span></span>'+
+    '</div>'+
+    '<div class="cmd">'+cmd+'</div>'+
+    '<div class="tag">'+esc(L.tag)+'</div>'+
+    '<p class="desc">'+esc(L.desc)+'</p>'+
+  '</article>';
+}
+function renderSections(){
+  var root=document.getElementById('content');
+  var html='';
+  SECTIONS.forEach(function(sec){
+    var items=DATA.filter(function(d){return d.kind===sec.kind;});
+    var S=sec[lang];
+    html+='<section class="block" id="'+sec.id+'">'+
+      '<div class="sec-head reveal">'+
+        '<span class="sec-ico"><svg data-lucide="'+sec.icon+'"></svg></span>'+
+        '<h2>'+esc(S.t)+' <span class="count">'+items.length+'</span></h2>'+
+      '</div>'+
+      '<p class="sec-sub reveal">'+esc(S.s)+'</p>'+
+      '<div class="grid">'+items.map(cardHTML).join('')+'</div>'+
+    '</section>';
+  });
+  root.innerHTML=html;
+}
+
+/* ---------------- i18n for static chrome ---------------- */
+function applyLang(){
+  document.documentElement.setAttribute('lang',lang);
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var k=el.getAttribute('data-i18n'), v=I18N[lang][k];
+    if(v!=null) el.innerHTML=v;
+  });
+  document.querySelectorAll('[data-lang-set]').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-lang-set')===lang));
+  });
+  renderSections();
+  if(window.lucide) lucide.createIcons();
+  observe();
+}
+
+/* ---------------- theme ---------------- */
+function setTheme(t){
+  if(t==='light') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme',t);
+  try{localStorage.setItem('df-theme',t);}catch(e){}
+  document.querySelectorAll('[data-theme-set]').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-theme-set')===t));
+  });
+}
+
+/* ---------------- reveal observer ---------------- */
+var io;
+function observe(){
+  var els=document.querySelectorAll('.reveal:not(.in)');
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in');});return;}
+  if(!io){
+    io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target);} });
+    },{rootMargin:'0px 0px -8% 0px',threshold:.08});
+  }
+  var i=0;
+  els.forEach(function(e){
+    var grid=e.closest('.grid');
+    if(grid){ e.style.setProperty('--d',((i%3)*70)+'ms'); i++; }
+    io.observe(e);
+  });
+}
+
+/* ---------------- copy ---------------- */
+document.addEventListener('click',function(ev){
+  var b=ev.target.closest('.copy'); if(!b) return;
+  var txt=b.getAttribute('data-copy');
+  navigator.clipboard.writeText(txt).then(function(){
+    b.classList.add('ok');
+    var span=b.querySelector('span'); var old=span?span.textContent:'';
+    if(span) span.textContent=I18N[lang].copied;
+    setTimeout(function(){ b.classList.remove('ok'); if(span) span.textContent=I18N[lang].copy; },1400);
+  });
+});
+
+/* ---------------- wire controls ---------------- */
+document.querySelectorAll('[data-theme-set]').forEach(function(b){
+  b.addEventListener('click',function(){ setTheme(b.getAttribute('data-theme-set')); });
+});
+document.querySelectorAll('[data-lang-set]').forEach(function(b){
+  b.addEventListener('click',function(){
+    lang=b.getAttribute('data-lang-set');
+    try{localStorage.setItem('df-lang',lang);}catch(e){}
+    applyLang();
+  });
+});
+
+/* ---------------- init ---------------- */
+(function(){
+  var saved='light';
+  try{ saved=localStorage.getItem('df-theme')||'light'; }catch(e){}
+  setTheme(saved);
+  applyLang();
+})();
+</script>
+</body>
+</html>
