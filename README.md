@@ -6,14 +6,29 @@ Everything here is provider-agnostic and self-contained: no hardcoded paths, no 
 
 ## Install
 
-This repo is its own plugin marketplace.
+Landing page with copy-paste install for both surfaces:
+**https://mapuamap.github.io/denys-fast-mskills/**
+
+### Claude Code — full plugin (skills + commands + agents)
+
+This repo is its own plugin marketplace:
 
 ```
 /plugin marketplace add mapuamap/denys-fast-mskills
 /plugin install denys-fast-mskills@denys-fast-mskills
 ```
 
-Then restart Claude Code (or reload plugins). All skills, commands, and agents below become available.
+Then restart Claude Code (or reload plugins).
+
+### Claude Desktop / claude.ai — skills only
+
+Desktop and the web app can't add marketplaces; they install Agent Skills as uploaded `.zip` files, and only the **skills** carry over (the `m_*` commands and the agents are Claude Code-only).
+
+1. Enable code execution (Settings → Capabilities).
+2. **Customize → Skills → + → Create skill → Upload**.
+3. Upload the per-skill zips from [`docs/skills-pack/`](docs/skills-pack/) — one at a time.
+
+Those zips are generated from `skills/` by `scripts/build_skills_pack.py` (it drops `disable-model-invocation` so the skills are model-invocable off Claude Code).
 
 ## What's inside
 

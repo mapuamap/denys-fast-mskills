@@ -133,6 +133,17 @@ nav.links a:hover{color:var(--text);background:var(--surface);}
 .install-cmd .copy svg{width:14px;height:14px;}
 .install-hint{margin:9px 0 0;font-size:12.5px;color:var(--text-muted);}
 .install-hint code{font-size:12px;color:var(--text-secondary);}
+.itabs{display:inline-flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-full);padding:4px;margin-bottom:12px;}
+.itab{font-family:var(--font-sans);font-size:13px;font-weight:600;color:var(--text-muted);background:transparent;border:0;padding:7px 14px;border-radius:var(--radius-full);cursor:pointer;transition:color var(--dur-fast),background var(--dur-fast);}
+.itab[aria-selected="true"]{color:var(--on-primary);background:var(--primary);}
+.ipanel{display:none;}
+.ipanel.on{display:block;}
+.desk-steps{font-size:13px;color:var(--text-secondary);margin:0 0 2px;}
+.dl-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px;}
+.dl{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:12.5px;color:var(--text);background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:7px 11px;transition:color var(--dur-fast),border-color var(--dur-fast),transform var(--dur-fast);}
+.dl:hover{border-color:var(--primary);color:var(--primary);transform:translateY(-1px);}
+.dl svg{width:13px;height:13px;}
+.desk-note{margin:12px 0 0;font-size:12px;color:var(--text-muted);}
 
 .metarow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:9px;margin-top:24px;}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:var(--radius-full);background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);}
@@ -244,13 +255,29 @@ footer{border-top:1px solid var(--border);padding:34px 0;margin-top:48px;color:v
     <p class="sub" data-i18n="hero_sub">План → выполнение → проверка. Код, инфра, деплой и браузерные тесты — из одного плагина.</p>
 
     <div class="install">
-      <div class="install-label"><svg data-lucide="download"></svg><span data-i18n="install_label">Установка — вставь в Claude Code</span></div>
-      <div class="install-cmd">
-        <code><span class="slash">/</span>plugin marketplace add mapuamap/denys-fast-mskills
-<span class="slash">/</span>plugin install denys-fast-mskills@denys-fast-mskills</code>
-        <button class="copy" data-copy="/plugin marketplace add mapuamap/denys-fast-mskills&#10;/plugin install denys-fast-mskills@denys-fast-mskills"><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button>
+      <div class="itabs" role="tablist" aria-label="Install method">
+        <button class="itab" role="tab" data-tab="code" aria-selected="true" data-i18n="tab_code">Claude Code</button>
+        <button class="itab" role="tab" data-tab="desk" aria-selected="false" data-i18n="tab_desktop">Claude Desktop / web</button>
       </div>
-      <p class="install-hint" data-i18n="install_hint">Затем перезапусти Claude Code и запусти <code>/m_plan</code>.</p>
+      <div class="ipanel on" data-panel="code">
+        <div class="install-cmd">
+          <code><span class="slash">/</span>plugin marketplace add mapuamap/denys-fast-mskills
+<span class="slash">/</span>plugin install denys-fast-mskills@denys-fast-mskills</code>
+          <button class="copy" data-copy="/plugin marketplace add mapuamap/denys-fast-mskills&#10;/plugin install denys-fast-mskills@denys-fast-mskills"><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button>
+        </div>
+        <p class="install-hint" data-i18n="install_hint">Затем перезапусти Claude Code и запусти <code>/m_plan</code>.</p>
+      </div>
+      <div class="ipanel" data-panel="desk">
+        <p class="desk-steps" data-i18n="desk_steps">Включи code execution, затем Customize → Skills → + → Upload и загрузи .zip ниже.</p>
+        <div class="dl-row">
+          <a class="dl" href="skills-pack/m_plan.zip" download><svg data-lucide="download"></svg>m_plan</a>
+          <a class="dl" href="skills-pack/m_plan_implement.zip" download><svg data-lucide="download"></svg>m_plan_implement</a>
+          <a class="dl" href="skills-pack/m_code_init_project.zip" download><svg data-lucide="download"></svg>m_code_init_project</a>
+          <a class="dl" href="skills-pack/m_code_refactor.zip" download><svg data-lucide="download"></svg>m_code_refactor</a>
+          <a class="dl" href="skills-pack/m_code_rules_audit.zip" download><svg data-lucide="download"></svg>m_code_rules_audit</a>
+        </div>
+        <p class="desk-note" data-i18n="desk_note">Команды и агенты — только в Claude Code; на Desktop/web их нет.</p>
+      </div>
     </div>
 
     <div class="metarow">
@@ -350,6 +377,9 @@ var I18N={
     hero_sub:'План → выполнение → проверка. Код, инфра, деплой и браузерные тесты — из одного плагина.',
     install_label:'Установка — вставь в Claude Code',
     install_hint:'Затем перезапусти Claude Code и запусти <code>/m_plan</code>.',
+    tab_code:'Claude Code',tab_desktop:'Claude Desktop / web',
+    desk_steps:'Включи code execution, затем Customize → Skills → + → Upload и загрузи .zip ниже.',
+    desk_note:'Команды и агенты — только в Claude Code; на Desktop/web их нет.',
     b_skills:'скилов',b_commands:'команд',b_agents:'агента',cta_github:'GitHub',
     g_plan:'Планирование',g_code:'Кодовые скилы',g_commands:'Команды',g_agents:'Агенты',
     agents_note:'Read-only помощники — их вызывают скилы сами.',
@@ -360,6 +390,9 @@ var I18N={
     hero_sub:'Plan → execute → verify. Code, infra, deploy and browser tests — from one installed plugin.',
     install_label:'Install — paste into Claude Code',
     install_hint:'Then restart Claude Code and run <code>/m_plan</code>.',
+    tab_code:'Claude Code',tab_desktop:'Claude Desktop / web',
+    desk_steps:'Enable code execution, then Customize → Skills → + → Upload and add the .zip files below.',
+    desk_note:'Commands and agents are Claude Code only — not available on Desktop/web.',
     b_skills:'skills',b_commands:'commands',b_agents:'agents',cta_github:'GitHub',
     g_plan:'Planning',g_code:'Code skills',g_commands:'Commands',g_agents:'Agents',
     agents_note:'Read-only helpers — the skills call them automatically.',
@@ -429,6 +462,7 @@ document.addEventListener('click',function(ev){
 });
 document.querySelectorAll('[data-theme-set]').forEach(function(b){b.addEventListener('click',function(){setTheme(b.getAttribute('data-theme-set'));});});
 document.querySelectorAll('[data-lang-set]').forEach(function(b){b.addEventListener('click',function(){lang=b.getAttribute('data-lang-set');try{localStorage.setItem('df-lang',lang);}catch(e){}applyLang();});});
+document.querySelectorAll('.itab').forEach(function(b){b.addEventListener('click',function(){var t=b.getAttribute('data-tab');document.querySelectorAll('.itab').forEach(function(x){x.setAttribute('aria-selected',String(x===b));});document.querySelectorAll('.ipanel').forEach(function(p){p.classList.toggle('on',p.getAttribute('data-panel')===t);});});});
 (function(){var s='light';try{s=localStorage.getItem('df-theme')||'light';}catch(e){}setTheme(s);applyLang();
   if(window.dfLogo){
     try{dfLogo(document.getElementById('logoHeader'),{service:'mskills',state:'idle'});}catch(e){}
