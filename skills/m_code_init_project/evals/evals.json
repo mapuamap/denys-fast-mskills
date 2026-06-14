@@ -1,9 +1,9 @@
 {
-  "skill_name": "m_code-init-project",
+  "skill_name": "m_code_init_project",
   "evals": [
     {
       "id": "init-empty-repo",
-      "prompt": "/m_code-init-project Create a minimal TypeScript API and make it ready for Claude-assisted development.",
+      "prompt": "/m_code_init_project Create a minimal TypeScript API and make it ready for Claude-assisted development.",
       "expected_output": "Creates minimal architecture boundaries, CLAUDE.md, validation commands, docs, and first behavior-focused tests.",
       "assertions": [
         "Includes created/changed files.",
@@ -14,7 +14,7 @@
     },
     {
       "id": "init-existing-repo",
-      "prompt": "/m_code-init-project Harden this existing Python repo for AI coding without replacing existing conventions.",
+      "prompt": "/m_code_init_project Harden this existing Python repo for AI coding without replacing existing conventions.",
       "expected_output": "Reads existing conventions, preserves them, adds missing AI-ready docs/checks, and reports conflicts.",
       "assertions": [
         "Detects existing stack and commands.",

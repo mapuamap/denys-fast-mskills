@@ -10,7 +10,7 @@ You are working on **denys-fast-mskills**, a public Claude Code **plugin** that 
 
 | Kind | Items |
 |------|-------|
-| **Skills** (`skills/`) | `m_plan`, `m_plan_implement`, and `m_code_init_project`, `m_code_legacy_refactor`, `m_code_rules_audit`, `m_code_architecture_improvement`, `m_code_context_refresh` |
+| **Skills** (`skills/`) | `m_plan`, `m_plan_implement`, `m_code_init_project`, `m_code_refactor`, `m_code_rules_audit` |
 | **Commands** (`commands/`) | `m_setup`, `m_infr_init`, `m_infr`, `m_deploy_init`, `m_deploy_check`, `m_deploy`, `m_playwright_fulltest`, `m_explain` |
 | **Agents** (`agents/`) | `m_code_architecture_reviewer`, `m_code_context_scout`, `m_code_test_runner` |
 | **Payload** (`m_code_framework/`) | rules, hooks, `scripts/ai-check.sh`, `AI_INVARIANTS.md`, `settings*.json`, `README-hooks.md`, self-locating `install.sh`. This is NOT auto-loaded — `/m_setup` copies it into a target project's `.claude/`. |
@@ -29,6 +29,9 @@ Keep both; the README explains when to use which.
 - **Language:** everything user-facing is **English**. (Originals were partly Russian; that was translated on first release — keep new content English.)
 - **Commands** carry frontmatter `disable-model-invocation: true` (user-triggered only). Keep it on new commands unless you explicitly want model auto-invocation.
 - **Skill** = a directory under `skills/<name>/` with `SKILL.md` (YAML frontmatter `name` + `description`, then body). Bundled resources go in subdirs (`templates/`, `evals/`, `BLOCKERS.md`, …).
+- **Naming.** A skill's `/command` is its **directory name** — keep the `name:` frontmatter identical to the directory (underscores, e.g. `m_code_refactor`). **Agents are different:** their `name:` must use **hyphens** (`m_code-context-scout`, `m_code-test-runner`, `m_code-architecture-reviewer`), and that hyphenated name is the `subagent_type` skills reference when they delegate. Don't "fix" agent names to underscores — it breaks delegation.
+- **Skill→agent wiring.** The `m_code_*` skills delegate heavy sub-steps to the three agents: `m_code-context-scout` (wide read-only scans), `m_code-test-runner` (noisy build/test/lint runs), `m_code-architecture-reviewer` (independent boundary review). When editing these skills, keep those references — they exist so verbose work stays out of the main context. `m_plan` / `m_plan_implement` reference the scout / test-runner too.
+- **Invocation modes.** `m_code_*` skills are user-invoked (`disable-model-invocation: true`) — deliberate precision tools. That flag drops the description from the model's context, so write their descriptions as crisp human menu items, not auto-trigger bait. `m_plan` / `m_plan_implement` are model-invocable on purpose (they're the front door).
 - **No secrets, no machine-specific paths.** Never commit `H:\...`, `~/bin`, IPs, hostnames, tokens, SSH key names. The one allowed literal is `id_rsa` inside `m_code_framework/hooks/m_code_protect_files.py` — that's a *protection blocklist*, not a secret.
 - `m_setup` must stay portable: it shells out to `${CLAUDE_PLUGIN_ROOT}/m_code_framework/install.sh`, which self-locates via `BASH_SOURCE`. Don't hardcode an install source.
 
@@ -85,3 +88,4 @@ git tag v1.1.0 && git push --tags
 - `m_plan` Phase 2 references `m_plan_implement` Phase B as the single source of truth for execution — they must ship together (they do). If you split them, fix that cross-reference.
 - Consider a CHANGELOG.md once there are multiple releases.
 - `ai-check.sh` auto-detects npm/Python/Go/Rust. Extend there if you want more stacks.
+- v2.0.0 merged `m_code_legacy_refactor` + `m_code_architecture_improvement` → `m_code_refactor` (behavior modes `preserve` / `may-change`) and removed `m_code_context_refresh` (the global `handoff` skill covers it). Every `m_code_*` skill now wires the three agents; `m_plan` / `m_plan_implement` gained `evals/`.

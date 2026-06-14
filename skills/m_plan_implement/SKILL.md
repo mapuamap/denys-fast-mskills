@@ -33,7 +33,7 @@ Follow-up to `m_plan`. Reads existing artifacts, drives them to completion. No r
 
 6. **Deployment reality gate.** Before editing code, decide whether this plan has an actual runtime surface.
    - If the project is a deployed service/app/job: require a real environment target (VM, VPS, NAS, container host, CI/CD target, cloud app, Windows service, browser-served local app, etc.) and at least one remote or externally observable smoke check.
-   - Local build/unit tests on this workstation are preflight only. They never satisfy `V-DEPLOY-*`, `V-SMOKE-*`, or "done in real environment" rows unless the declared target itself is this workstation.
+   - **Deploy reality invariant:** local build / unit / dev-server checks on this workstation are *preflight only*. They never satisfy `V-DEPLOY-*`, `V-SMOKE-*`, or `V-E2E-*` rows unless `06` explicitly declares this workstation as the deployment target. The rules below all enforce this one invariant — they don't restate it.
    - If the plan claims "no deploy needed", verify that from artifacts and project type. For a deployable runtime, convert that to a blocker/deviation and ask for or infer the real deploy path.
    - If the target is production or a shared running service, apply the repo/user destructive-action policy before restarts, migrations, replacing containers, data changes, or reboots.
 
@@ -42,7 +42,7 @@ Follow-up to `m_plan`. Reads existing artifacts, drives them to completion. No r
 Walk `05_step_plan.md` step by step:
 - Respect dependency order. After each step's per-step check passes, flip its `V-STEP-Sxx` to `[x]` via `Edit`.
 - On failing check: diagnose, retry **once**. Second failure → `[!]` blocker, stop, jump to Phase C.
-- After all steps: local preflight build/test → (if `08` exists) e2e against the intended target when possible → real deploy → post-deploy smoke from outside or on the target host.
+- After all steps: local preflight build/test (delegate noisy runs to the `m_code-test-runner` agent, keep only the summary) → (if `08` exists) e2e against the intended target when possible → real deploy → post-deploy smoke from outside or on the target host.
 - Update other `V-*` rows as their evidence appears in the transcript.
 
 **Deviation logging (mandatory).** Any time the run drifts from `01–08`, append a one-line entry under `## Deviations` in `09_verification.md` **immediately** — do not wait for Phase C. A deviation is any of:
@@ -56,9 +56,8 @@ Format: `- Sxx / V-XXX-YY — plan said: <one quote>. Did: <…>. Why: <…>.`
 
 **Deploy walks `06` like steps walk `05`, but only against the real target.** Run `06`'s "Deploy order" entries in declared order, each followed by its matching smoke check from `06`'s table. Stop on first failure; flip the matching `V-DEPLOY-XX` to `[!]` with the failure line. If `06` says to run commands locally, first confirm that those commands actually publish/restart/update the real target; otherwise treat them as preflight, log a deviation, and use the discovered real deploy path or block.
 
-**Real-environment deploy rules.**
+**Real-environment deploy rules** (each one enforces the deploy reality invariant above):
 - Deploy verification must observe the real running artifact: `docker ps`/`compose ps` on the host, `systemctl status`, container image/tag/digest, service logs after restart, real HTTP/TCP/API probes, browser check against the served URL, scheduled task status, or equivalent.
-- Do not mark deploy/smoke/e2e rows done from `localhost`, `npm run dev`, in-repo test servers, mocks, or this workstation's filesystem unless `06` explicitly declares this workstation as the deployment target.
 - Prefer the estate/project deployment path already documented in repo docs, wiki, scripts, service files, compose files, CI config, or AGENTS/CLAUDE instructions.
 - If deploy requires SSH, use the declared host and verify on that host after the command completes. If deploy uses CI/CD, trigger/watch the real pipeline and verify the deployed endpoint.
 - For migrations or restarts on production/shared services, read current state first, preserve running state, and ask before destructive actions as required by local operating rules.

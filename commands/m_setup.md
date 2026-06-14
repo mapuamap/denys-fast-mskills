@@ -21,7 +21,7 @@ Steps:
    - Otherwise append this section only if it is not already present (never overwrite existing content):
      ```
      ## m_code
-     Code-quality framework installed. Skills: /m_code_init_project, /m_code_legacy_refactor, /m_code_rules_audit, /m_code_architecture_improvement, /m_code_context_refresh. Verification: ./scripts/ai-check.sh
+     Code-quality framework installed. Skills: /m_code_init_project, /m_code_refactor, /m_code_rules_audit. Verification: ./scripts/ai-check.sh
      ```
 
 4. Say: "Done. Run /m_code_init_project to tailor the rules and CLAUDE.md to this project's stack."

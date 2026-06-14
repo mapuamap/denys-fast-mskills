@@ -1,10 +1,10 @@
 ---
-name: m_code-init-project
-description: Initializes or hardens a software project for AI-assisted development. Use when bootstrapping, scaffolding, or preparing a repository with CLAUDE.md, .claude/rules, architecture boundaries, deterministic checks, tests, CI readiness, and safe Claude Code workflows.
+name: m_code_init_project
+description: Initialize or harden a project for AI-assisted development — CLAUDE.md, .claude/rules, architecture boundaries, seams for nondeterminism, deterministic check commands, first behavior tests, and CI readiness. Use when bootstrapping a new repo or making an existing one safe for repeated Claude-assisted change.
 disable-model-invocation: true
 ---
 
-# m_code-init-project
+# m_code_init_project
 
 Initialize a repository so Claude and humans can repeatedly build, test, review, and change it safely.
 
@@ -24,7 +24,7 @@ Default behavior:
 
 ### 1. Inspect before writing
 
-Read only what is needed:
+For an existing repo of any size, delegate the wide scan to the `m_code-context-scout` agent and keep only its map — that keeps the raw inspection out of your main context. Read only what is needed:
 
 ```txt
 - git status
@@ -175,7 +175,7 @@ Do not add hooks, permission changes, or `allowed-tools` unless the user explici
 
 ### 8. Validate
 
-Run the smallest safe checks available:
+Run the smallest safe checks available — delegate noisy runs to the `m_code-test-runner` agent and keep only the summary:
 
 ```txt
 - test or focused test

@@ -1,0 +1,50 @@
+{
+  "skill_name": "m_code_refactor",
+  "evals": [
+    {
+      "id": "preserve-safe-slice",
+      "prompt": "/m_code_refactor Refactor src/billing without changing behavior.",
+      "expected_output": "Enters preserve mode, establishes a baseline, names the behavior contract, adds characterization tests where needed, introduces seams before moving code, and ships one reviewable slice.",
+      "assertions": [
+        "Selects preserve mode (no behavior change).",
+        "Includes baseline checks reported as pass/fail/skipped.",
+        "Adds or relies on characterization/regression tests before risky movement.",
+        "Does not hide API/schema/auth/payment changes.",
+        "Keeps the change to one reviewable slice rather than a rewrite."
+      ]
+    },
+    {
+      "id": "preserve-no-tests",
+      "prompt": "/m_code_refactor This legacy module has no tests. Clean it up.",
+      "expected_output": "Starts by characterizing current behavior with tests rather than rewriting, then refactors one small slice.",
+      "assertions": [
+        "Notes the no-test baseline.",
+        "Writes characterization/golden-output tests first.",
+        "Avoids a big-bang rewrite.",
+        "Reports remaining risk."
+      ]
+    },
+    {
+      "id": "may-change-architecture",
+      "prompt": "/m_code_refactor The order service has business logic in the HTTP controller and talks to the DB directly. Improve the architecture.",
+      "expected_output": "Enters may-change mode, maps the structure (optionally via the context-scout agent), extracts pure decision logic, introduces a port/seam for persistence, and justifies each abstraction by concrete friction.",
+      "assertions": [
+        "Identifies concrete problems with evidence (controller business logic, direct DB calls).",
+        "Proposes the smallest useful target shape, not a full redesign.",
+        "Justifies each new abstraction against the decision rules.",
+        "Adds tests or seams before risky moves.",
+        "Flags auth/migration/etc. for human review where relevant."
+      ]
+    },
+    {
+      "id": "report-only-review",
+      "prompt": "/m_code_refactor Review the architecture of the payments package and give me a migration plan. Don't change anything yet.",
+      "expected_output": "report-only strategy: an assessment plus a prioritized migration plan, with no code edits.",
+      "assertions": [
+        "Makes no code edits.",
+        "Produces findings with severity and evidence.",
+        "Produces an ordered migration plan of small steps."
+      ]
+    }
+  ]
+}

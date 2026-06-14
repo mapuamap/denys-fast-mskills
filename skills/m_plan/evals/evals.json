@@ -1,0 +1,40 @@
+{
+  "skill_name": "m_plan",
+  "evals": [
+    {
+      "id": "tiny-task-right-sizing",
+      "prompt": "/m_plan Fix the off-by-one in the pagination helper in src/utils/paginate.ts.",
+      "expected_output": "Classifies the task as tiny, writes only artifacts 01/04/05/09, asks at most one blocker batch (including size confirmation), then executes and decides done from 09.",
+      "assertions": [
+        "Pre-classifies the task as tiny.",
+        "Writes only the tiny artifact set (01, 04, 05, 09); does not write 02/03/06/07/08.",
+        "Asks blocker + size-confirmation questions in a single batch (or one numbered list when AskUserQuestion is unavailable).",
+        "Decides 'done' from 09_verification.md, not from its own judgement.",
+        "Asks before appending .m_plan/ to .gitignore."
+      ]
+    },
+    {
+      "id": "large-task-full-pipeline",
+      "prompt": "/m_plan Add a billing webhook endpoint that writes to a new table and deploys to our staging VPS.",
+      "expected_output": "Classifies as large, writes all 9 artifacts, asks blockers covering environment/secrets/migration/deploy, and treats deploy and smoke as real-target gates.",
+      "assertions": [
+        "Pre-classifies as large and writes all 9 artifacts.",
+        "Blocker questions cover environment, secrets, migration, and deploy approval.",
+        "08_e2e_plan.md is written because a new externally-callable endpoint is added.",
+        "09 lists V-DEPLOY / V-SMOKE rows tied to the real target, not localhost.",
+        "Build/test commands live only in 07 and are referenced elsewhere, not duplicated."
+      ]
+    },
+    {
+      "id": "execute-and-verify",
+      "prompt": "/m_plan Add a --json flag to the export CLI command.",
+      "expected_output": "Plans (small/medium), walks the step plan, flips V-STEP rows as per-step checks pass, logs deviations immediately into 09, and reports from 09.",
+      "assertions": [
+        "Walks 05 step-by-step and flips V-STEP-Sxx via edits as per-step checks pass.",
+        "Logs deviations under ## Deviations in 09 as they happen, not reconstructed at the end.",
+        "Runs a final V-* sweep before declaring done.",
+        "Does not edit 01-08 to shrink scope and does not delete V-* rows."
+      ]
+    }
+  ]
+}

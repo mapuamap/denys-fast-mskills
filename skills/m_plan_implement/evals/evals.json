@@ -1,0 +1,38 @@
+{
+  "skill_name": "m_plan_implement",
+  "evals": [
+    {
+      "id": "resume-existing-plan",
+      "prompt": "/m_plan_implement Resume the plan under .m_plan/add-csv-export/.",
+      "expected_output": "Loads the existing artifacts, detects resume state (done/open/blocked), and continues without re-planning.",
+      "assertions": [
+        "Reads at least 01/04/05/09 from the named plan.",
+        "Summarizes resume state (already done / open / blocked) and asks resume/restart/stop.",
+        "Does not regenerate or edit 01-08 to change scope.",
+        "Extracts build/test commands from 07 or CLAUDE.md rather than inventing them."
+      ]
+    },
+    {
+      "id": "real-deploy-gate",
+      "prompt": "/m_plan_implement Finish and deploy the staging webhook plan.",
+      "expected_output": "Walks the step plan, then enforces a real-target deploy: refuses to mark V-DEPLOY/V-SMOKE done from localhost, observes the real running artifact, and blocks if no real deploy path exists.",
+      "assertions": [
+        "Treats local build/unit/dev-server checks as preflight only (deploy reality invariant).",
+        "Requires observation of the real running artifact (remote probe, container status, service logs, etc.).",
+        "If no real deploy path is identifiable for a deployable runtime, stops with V-DEPLOY-* blocked instead of reporting DONE.",
+        "Applies the destructive-action policy before restarts/migrations on shared or prod targets."
+      ]
+    },
+    {
+      "id": "three-section-report",
+      "prompt": "/m_plan_implement Execute the plan and give me the report.",
+      "expected_output": "After execution, re-reads 09 and emits the Done / Worked-around-or-changed / Not-done report with status and the next smallest step.",
+      "assertions": [
+        "Emits all three report sections even when one is empty.",
+        "Pulls 'worked around or changed' from 09's ## Deviations verbatim.",
+        "Final status is one of DONE / PARTIAL / BLOCKED and matches the V-* states.",
+        "Names the smallest next action for each open or blocked item."
+      ]
+    }
+  ]
+}

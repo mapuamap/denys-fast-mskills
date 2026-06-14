@@ -12,7 +12,7 @@ Plan → execute → verify. Right-sizes the plan to the task, runs blocker ques
 
 ## Phase 0 — Blockers + sizing (one round)
 
-1. **Scan in parallel** (read-only): `git status`, `git log --oneline -10`, `CLAUDE.md`, `AGENTS.md`, `.claude/rules/*.md`, `infra.md`, `deploy.md`, top-level tree, package/build manifests, existing `.m_plan/`.
+1. **Scan in parallel** (read-only): `git status`, `git log --oneline -10`, `CLAUDE.md`, `AGENTS.md`, `.claude/rules/*.md`, `infra.md`, `deploy.md`, top-level tree, package/build manifests, existing `.m_plan/`. For a large or unfamiliar repo, delegate the codebase portion of this scan to the `m_code-context-scout` agent and keep only its map.
 
 2. **Pre-classify task size** by these classes:
    - **tiny** (one file, < 50 LOC, no infra, no migration) → files `01, 04, 05, 09`.

@@ -1,10 +1,10 @@
 ---
-name: m_code-rules-audit
-description: Checks whether code follows project rules and quality gates. Use for auditing diffs, branches, files, PR readiness, CLAUDE.md/.claude/rules compliance, architecture boundaries, tests, typecheck, lint, build, security-sensitive changes, and rule violations.
+name: m_code_rules_audit
+description: Audit code against the rules that actually exist in this repo (CLAUDE.md, .claude/rules, configs, CI) plus the deterministic checks that can run safely — architecture boundaries, tests, typecheck, lint, build, security-sensitive changes. report-only by default. Use for PR/commit readiness and rule-compliance checks; complements /code-review, which is rule-agnostic.
 disable-model-invocation: true
 ---
 
-# m_code-rules-audit
+# m_code_rules_audit
 
 Audit code against the rules that actually exist in the repo and the deterministic checks that can be run safely.
 
@@ -80,7 +80,7 @@ High-risk changes require stronger evidence, tests, and human review.
 
 ### 4. Run deterministic checks when safe
 
-Prefer repo-defined commands over invented commands:
+Delegate noisy or large-output runs to the `m_code-test-runner` agent and keep only its concise summary plus the exact commands. Prefer repo-defined commands over invented commands:
 
 ```txt
 format check
@@ -99,7 +99,7 @@ LLM review is not a deterministic check. Treat it as supplementary.
 
 ### 5. Audit dimensions
 
-Check only against evidence:
+Check only against evidence. For the architecture dimension you can delegate an independent read to the `m_code-architecture-reviewer` agent and fold its findings in:
 
 ```txt
 Rules compliance:
