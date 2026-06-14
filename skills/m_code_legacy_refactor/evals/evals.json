@@ -1,0 +1,26 @@
+{
+  "skill_name": "m_code-legacy-refactor",
+  "evals": [
+    {
+      "id": "legacy-safe-slice",
+      "prompt": "/m_code-legacy-refactor Refactor src/billing without changing behavior.",
+      "expected_output": "Establishes baseline, identifies public contracts, adds characterization tests when needed, introduces seams, and changes one reviewable slice.",
+      "assertions": [
+        "Includes baseline checks.",
+        "Includes behavior preservation evidence.",
+        "Does not hide API/schema/auth/payment changes.",
+        "Uses seams before risky movement."
+      ]
+    },
+    {
+      "id": "legacy-no-tests",
+      "prompt": "/m_code-legacy-refactor This legacy module has no tests. Clean it up.",
+      "expected_output": "Starts with characterization/golden-output tests rather than a rewrite.",
+      "assertions": [
+        "Mentions no-test baseline.",
+        "Avoids big-bang rewrite.",
+        "Reports remaining risk."
+      ]
+    }
+  ]
+}

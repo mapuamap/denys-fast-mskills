@@ -1,0 +1,14 @@
+{
+  "name": "denys-fast-mskills",
+  "owner": {
+    "name": "mapuamap",
+    "url": "https://github.com/mapuamap"
+  },
+  "plugins": [
+    {
+      "name": "denys-fast-mskills",
+      "source": "./",
+      "description": "m_* toolkit: m_plan plan->execute->verify pipeline, deploy/infra context commands, Playwright full-test loop, and the m_code code-quality framework."
+    }
+  ]
+}

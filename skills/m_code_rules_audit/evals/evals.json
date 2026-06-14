@@ -1,0 +1,26 @@
+{
+  "skill_name": "m_code-rules-audit",
+  "evals": [
+    {
+      "id": "audit-current-diff",
+      "prompt": "/m_code-rules-audit Check my current diff before commit.",
+      "expected_output": "Reads actual rule sources, inspects the diff, runs safe checks, and reports severity-ranked findings with merge readiness.",
+      "assertions": [
+        "Lists rule sources inspected.",
+        "Lists checks run or skipped.",
+        "Findings include severity, source, evidence, impact, and fix.",
+        "Does not edit by default."
+      ]
+    },
+    {
+      "id": "audit-domain-boundary",
+      "prompt": "/m_code-rules-audit Check whether src/domain follows architecture rules.",
+      "expected_output": "Checks actual imports/calls against explicit rules and reports concrete boundary violations.",
+      "assertions": [
+        "Uses file/import/call evidence.",
+        "Does not invent rules.",
+        "Readiness is conservative."
+      ]
+    }
+  ]
+}

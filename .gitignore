@@ -1,0 +1,8 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# Claude Code transient state (only relevant if this repo is itself used as a project)
+.claude/state/
+.m_plan/
