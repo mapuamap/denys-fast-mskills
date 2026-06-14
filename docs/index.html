@@ -4,15 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>denys-fast-mskills — m_* toolkit for Claude Code</title>
-<meta name="description" content="A disciplined m_* toolkit for Claude Code: plan → execute → verify, code-quality skills, infra/deploy commands, and read-only review agents. Дисциплинированный m_*-набор для Claude Code." />
+<meta name="description" content="A disciplined m_* toolkit for Claude Code: plan → execute → verify, code-quality skills, infra/deploy commands and review agents. Дисциплинированный m_*-набор для Claude Code." />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="denys-fast-mskills — m_* toolkit for Claude Code" />
-<meta property="og:description" content="Plan → execute → verify. Harden, refactor and audit code. Drive infra, deploy and browser tests — all from one installed plugin." />
+<meta property="og:description" content="Plan → execute → verify. Code, infra, deploy and browser tests — from one installed plugin." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@1,800&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Oxanium:wght@600;700&display=swap" rel="stylesheet" />
 <script>
-  // Restore saved theme/lang before paint (no flash)
   try {
     var t = localStorage.getItem('df-theme');
     if (t && t !== 'light') document.documentElement.setAttribute('data-theme', t);
@@ -21,7 +20,7 @@
   } catch (e) {}
 </script>
 <style>
-/* ============ denys.fast canonical tokens ============ */
+/* ===== denys.fast tokens ===== */
 :root{
   --font-brand:'Saira',system-ui,sans-serif;
   --font-sans:'Geist',system-ui,-apple-system,sans-serif;
@@ -31,96 +30,68 @@
   --shadow-sm:0 1px 2px hsl(var(--shadow-color)/.08);
   --shadow-md:0 4px 10px hsl(var(--shadow-color)/.10);
   --shadow-lg:0 10px 24px hsl(var(--shadow-color)/.14);
-  --shadow-xl:0 20px 48px hsl(var(--shadow-color)/.18);
-  --dur-fast:100ms;--dur-base:200ms;--dur-slow:300ms;
-  --ease-out:cubic-bezier(.2,.8,.3,1);
-  --ease-spring:cubic-bezier(.34,1.4,.55,1);
-  /* Light (default) */
+  --dur-fast:100ms;--dur-base:200ms;
+  --ease-out:cubic-bezier(.2,.8,.3,1);--ease-spring:cubic-bezier(.34,1.4,.55,1);
   --bg:#FFFFFF;--surface:#F6F7F9;--surface-elevated:#FFFFFF;--surface-sunken:#EFF1F4;
-  --overlay:rgba(15,18,25,.45);--border:#E3E6EB;--border-strong:#D2D7DE;--divider:#EEF0F3;
-  --text:#14171F;--text-secondary:#515A67;--text-muted:#8A93A1;--text-inverse:#FFFFFF;--text-link:#4F46E5;
-  --primary:#5048E5;--primary-hover:#4038C8;--primary-active:#352DA8;--primary-soft:#ECEBFD;--on-primary:#FFFFFF;
+  --border:#E3E6EB;--border-strong:#D2D7DE;--divider:#EEF0F3;
+  --text:#14171F;--text-secondary:#515A67;--text-muted:#8A93A1;
+  --primary:#5048E5;--primary-hover:#4038C8;--primary-soft:#ECEBFD;--on-primary:#FFFFFF;
   --secondary:#7C3AED;--accent:#06B6D4;
-  --success:#16A34A;--success-soft:#E7F6EC;--warning:#D97706;--warning-soft:#FCF1E2;
-  --error:#DC2626;--info:#2563EB;--info-soft:#E8F0FE;
-  --focus-ring:rgba(80,72,229,.40);--shadow-color:220 25% 20%;--selection-bg:#D7D4FB;
+  --success:#16A34A;--warning:#D97706;--error:#DC2626;--info:#2563EB;
+  --shadow-color:220 25% 20%;--selection-bg:#D7D4FB;
   --gradient-brand:linear-gradient(135deg,#5048E5,#06B6D4);
 }
 [data-theme="cream"]{
   --bg:#F4EDE0;--surface:#FBF6EC;--surface-elevated:#FFFDF8;--surface-sunken:#EBE2D1;
-  --overlay:rgba(43,38,32,.40);--border:#E2D6C2;--border-strong:#D2C3A9;--divider:#EADFCC;
-  --text:#2B2620;--text-secondary:#6B6253;--text-muted:#9A8F7C;--text-inverse:#FBF6EC;--text-link:#BC5B2E;
-  --primary:#BC5B2E;--primary-hover:#A54D24;--primary-active:#8C401D;--primary-soft:#F4E2D4;--on-primary:#FFFDF8;
+  --border:#E2D6C2;--border-strong:#D2C3A9;--divider:#EADFCC;
+  --text:#2B2620;--text-secondary:#6B6253;--text-muted:#9A8F7C;
+  --primary:#BC5B2E;--primary-hover:#A54D24;--primary-soft:#F4E2D4;--on-primary:#FFFDF8;
   --secondary:#7A4FB0;--accent:#C2941B;
-  --success:#4D7C0F;--success-soft:#ECF1DF;--warning:#B45309;--warning-soft:#F7E9D7;
-  --error:#B4231D;--info:#2C5E8A;--info-soft:#E1EBF2;
-  --focus-ring:rgba(188,91,46,.40);--shadow-color:30 30% 25%;--selection-bg:#EAD3BE;
+  --success:#4D7C0F;--warning:#B45309;--error:#B4231D;--info:#2C5E8A;
+  --shadow-color:30 30% 25%;--selection-bg:#EAD3BE;
   --gradient-brand:linear-gradient(135deg,#BC5B2E,#C2941B);
 }
 [data-theme="espresso"]{
   --bg:#1A1410;--surface:#241C16;--surface-elevated:#2E251D;--surface-sunken:#130E0A;
-  --overlay:rgba(10,6,3,.60);--border:#3B2F25;--border-strong:#4D3E30;--divider:#2E251D;
-  --text:#F0E8DD;--text-secondary:#B8A693;--text-muted:#8A7A65;--text-inverse:#1A1410;--text-link:#E0853D;
-  --primary:#E0853D;--primary-hover:#EC9450;--primary-active:#C97231;--primary-soft:#2E2018;--on-primary:#1A1410;
+  --border:#3B2F25;--border-strong:#4D3E30;--divider:#2E251D;
+  --text:#F0E8DD;--text-secondary:#B8A693;--text-muted:#8A7A65;
+  --primary:#E0853D;--primary-hover:#EC9450;--primary-soft:#2E2018;--on-primary:#1A1410;
   --secondary:#C9A2F0;--accent:#93B84F;
-  --success:#93B84F;--success-soft:#1F2912;--warning:#E0A53D;--warning-soft:#2E2410;
-  --error:#E57363;--info:#6BA6C9;--info-soft:#14222B;
-  --focus-ring:rgba(224,133,61,.45);--shadow-color:25 40% 3%;--selection-bg:#4A3220;
+  --success:#93B84F;--warning:#E0A53D;--error:#E57363;--info:#6BA6C9;
+  --shadow-color:25 40% 3%;--selection-bg:#4A3220;
   --gradient-brand:linear-gradient(135deg,#E0853D,#C2941B);
 }
 [data-theme="obsidian"]{
   --bg:#000000;--surface:#0D0D0F;--surface-elevated:#161618;--surface-sunken:#000000;
-  --overlay:rgba(0,0,0,.70);--border:#26262A;--border-strong:#38383D;--divider:#1C1C1F;
-  --text:#F4F4F5;--text-secondary:#A1A1AA;--text-muted:#71717A;--text-inverse:#000000;--text-link:#2DD4BF;
-  --primary:#2DD4BF;--primary-hover:#4EE0CE;--primary-active:#20B6A3;--primary-soft:#0A1E1B;--on-primary:#000000;
+  --border:#26262A;--border-strong:#38383D;--divider:#1C1C1F;
+  --text:#F4F4F5;--text-secondary:#A1A1AA;--text-muted:#71717A;
+  --primary:#2DD4BF;--primary-hover:#4EE0CE;--primary-soft:#0A1E1B;--on-primary:#000000;
   --secondary:#A78BFA;--accent:#FACC15;
-  --success:#34D399;--success-soft:#07241D;--warning:#FACC15;--warning-soft:#241E07;
-  --error:#FB7185;--info:#818CF8;--info-soft:#16162B;
-  --focus-ring:rgba(45,212,191,.50);--shadow-color:0 0% 0%;--selection-bg:#14403A;
+  --success:#34D399;--warning:#FACC15;--error:#FB7185;--info:#818CF8;
+  --shadow-color:0 0% 0%;--selection-bg:#14403A;
   --gradient-brand:linear-gradient(135deg,#2DD4BF,#A78BFA);
 }
 ::selection{background:var(--selection-bg);}
 
-/* ============ base ============ */
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{
-  margin:0;background:var(--bg);color:var(--text);
-  font-family:var(--font-sans);font-size:16px;line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-  transition:background var(--dur-base) var(--ease-out),color var(--dur-base) var(--ease-out);
-}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;transition:background var(--dur-base) var(--ease-out),color var(--dur-base) var(--ease-out);}
 a{color:inherit;text-decoration:none;}
-.wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
-code,.mono{font-family:var(--font-mono);}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+code{font-family:var(--font-mono);}
 .num{font-family:var(--font-num);}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--primary);border-radius:var(--radius-md);}
 
-/* focus: brand double-ring */
-a:focus-visible,button:focus-visible{
-  outline:none;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--primary);border-radius:var(--radius-md);
-}
-
-/* ============ header ============ */
-header{
-  position:sticky;top:0;z-index:1100;
-  background:color-mix(in srgb,var(--bg) 82%,transparent);
-  backdrop-filter:saturate(140%) blur(10px);
-  border-bottom:1px solid var(--border);
-}
-.hbar{display:flex;align-items:center;gap:16px;height:64px;}
+/* ===== header ===== */
+header{position:sticky;top:0;z-index:1100;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--border);}
+.hbar{display:flex;align-items:center;gap:16px;height:62px;}
 .brand{display:flex;align-items:center;gap:11px;}
-.mark{height:26px;width:auto;display:block;}
-.mark .ln{fill:var(--primary);}
-.mark .cv-back{stroke:var(--primary);}
-.mark .cv-front{stroke:var(--text);}
+.mark{height:25px;width:auto;display:block;}
+.mark .ln{fill:var(--primary);}.mark .cv-back{stroke:var(--primary);}.mark .cv-front{stroke:var(--text);}
 .wordmark{font-family:var(--font-brand);font-style:italic;font-weight:800;font-size:20px;letter-spacing:-.01em;line-height:1;white-space:nowrap;}
-.wordmark .svc{color:var(--primary);}
-.wordmark .dom{color:var(--text);}
-nav.links{display:flex;gap:6px;margin-left:auto;}
-nav.links a{
-  font-size:14px;font-weight:500;color:var(--text-secondary);
-  padding:8px 12px;border-radius:var(--radius-md);transition:color var(--dur-fast),background var(--dur-fast);
-}
+.wordmark .svc{color:var(--primary);}.wordmark .dom{color:var(--text);}
+nav.links{display:flex;gap:4px;margin-left:auto;}
+nav.links a{font-size:14px;font-weight:500;color:var(--text-secondary);padding:8px 12px;border-radius:var(--radius-md);transition:color var(--dur-fast),background var(--dur-fast);}
 nav.links a:hover{color:var(--text);background:var(--surface);}
 .tools{display:flex;align-items:center;gap:10px;margin-left:8px;}
 .swatches{display:flex;gap:6px;padding:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-full);}
@@ -129,138 +100,98 @@ nav.links a:hover{color:var(--text);background:var(--surface);}
 .sw[aria-pressed="true"]{border-color:var(--text);}
 .sw.light{background:#5048E5;}.sw.cream{background:#BC5B2E;}.sw.espresso{background:#E0853D;}.sw.obsidian{background:#2DD4BF;}
 .lang{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-full);overflow:hidden;}
-.lang button{
-  font-family:var(--font-sans);font-size:13px;font-weight:600;color:var(--text-muted);
-  background:transparent;border:0;padding:6px 11px;cursor:pointer;transition:color var(--dur-fast),background var(--dur-fast);
-}
+.lang button{font-family:var(--font-sans);font-size:13px;font-weight:600;color:var(--text-muted);background:transparent;border:0;padding:6px 11px;cursor:pointer;transition:color var(--dur-fast),background var(--dur-fast);}
 .lang button[aria-pressed="true"]{color:var(--on-primary);background:var(--primary);}
 .gh{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-md);color:var(--text-secondary);border:1px solid var(--border);transition:all var(--dur-fast);}
 .gh:hover{color:var(--text);border-color:var(--border-strong);background:var(--surface);}
 .gh svg{width:18px;height:18px;}
 
-/* ============ hero ============ */
-.hero{position:relative;overflow:hidden;padding:84px 0 64px;}
-.hero::before{
-  content:"";position:absolute;inset:0;z-index:0;opacity:.10;pointer-events:none;
-  background:
-    radial-gradient(620px 320px at 78% -8%,var(--primary),transparent 70%),
-    radial-gradient(520px 280px at 12% 8%,var(--accent),transparent 72%);
-}
+/* ===== hero ===== */
+.hero{position:relative;overflow:hidden;padding:64px 0 40px;}
+.hero::before{content:"";position:absolute;inset:0;z-index:0;opacity:.10;pointer-events:none;background:radial-gradient(560px 300px at 80% -10%,var(--primary),transparent 70%),radial-gradient(460px 260px at 10% 6%,var(--accent),transparent 72%);}
 .hero .wrap{position:relative;z-index:1;}
+.hero-mark{position:absolute;right:-44px;top:46%;transform:translateY(-50%);height:280px;opacity:.06;z-index:0;pointer-events:none;}
 .overline{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--primary);display:inline-flex;align-items:center;gap:8px;}
 .overline::before{content:"›";font-weight:800;font-size:15px;}
-.hero h1{font-size:clamp(34px,5.4vw,56px);line-height:1.05;letter-spacing:-.02em;font-weight:700;margin:18px 0 0;max-width:18ch;}
+.hero h1{font-size:clamp(32px,5vw,52px);line-height:1.06;letter-spacing:-.02em;font-weight:700;margin:16px 0 0;max-width:17ch;}
 .hero h1 .grad{background:var(--gradient-brand);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-.hero p.sub{font-size:clamp(16px,2vw,19px);color:var(--text-secondary);max-width:62ch;margin:20px 0 0;line-height:1.6;}
-.badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;}
-.badge{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:7px 13px;border-radius:var(--radius-full);background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);}
-.badge svg{width:15px;height:15px;color:var(--primary);}
-.badge .num{color:var(--text);font-size:14px;}
-.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px;}
-.btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-sans);font-size:15px;font-weight:600;padding:12px 20px;border-radius:var(--radius-md);cursor:pointer;border:1px solid transparent;transition:transform var(--dur-fast) var(--ease-spring),background var(--dur-fast),box-shadow var(--dur-fast);}
-.btn svg{width:17px;height:17px;}
-.btn-primary{background:var(--primary);color:var(--on-primary);box-shadow:var(--shadow-md);}
-.btn-primary:hover{background:var(--primary-hover);transform:translateY(-2px);box-shadow:var(--shadow-lg);}
-.btn-primary:active{transform:scale(.97);}
-.btn-ghost{background:var(--surface-elevated);color:var(--text);border-color:var(--border-strong);}
-.btn-ghost:hover{background:var(--surface);transform:translateY(-2px);}
-.hero-mark{position:absolute;right:-40px;top:50%;transform:translateY(-50%);height:300px;opacity:.07;z-index:0;pointer-events:none;}
+.hero p.sub{font-size:clamp(16px,2vw,18px);color:var(--text-secondary);max-width:54ch;margin:16px 0 0;}
 
-/* ============ install one-liner in hero ============ */
-.cmdline{margin-top:24px;display:inline-flex;align-items:center;gap:12px;max-width:100%;
-  background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-md);
-  padding:11px 12px 11px 16px;box-shadow:var(--shadow-sm);overflow:hidden;}
-.cmdline code{font-size:13.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.cmdline code .dim{color:var(--text-muted);}
-.copy{flex:none;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);font-size:12px;font-weight:600;
-  color:var(--text-secondary);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;cursor:pointer;transition:all var(--dur-fast);}
-.copy:hover{color:var(--text);border-color:var(--border-strong);}
-.copy svg{width:14px;height:14px;}
-.copy.ok{color:var(--success);border-color:var(--success);}
+/* install box (top) */
+.install{margin-top:26px;max-width:600px;}
+.install-label{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;}
+.install-label svg{width:15px;height:15px;color:var(--primary);}
+.install-cmd{display:flex;align-items:stretch;background:var(--surface-elevated);border:1px solid var(--border-strong);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-md);}
+.install-cmd code{flex:1;min-width:0;padding:13px 16px;font-size:13px;line-height:1.85;color:var(--text);white-space:pre;overflow-x:auto;}
+.install-cmd code .slash{color:var(--primary);}
+.install-cmd .copy{flex:none;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);font-size:12px;font-weight:600;color:var(--text-secondary);background:var(--surface);border:0;border-left:1px solid var(--border);padding:0 15px;cursor:pointer;transition:color var(--dur-fast),background var(--dur-fast);}
+.install-cmd .copy:hover{color:var(--text);background:var(--surface-sunken);}
+.install-cmd .copy.ok{color:var(--success);}
+.install-cmd .copy svg{width:14px;height:14px;}
+.install-hint{margin:9px 0 0;font-size:12.5px;color:var(--text-muted);}
+.install-hint code{font-size:12px;color:var(--text-secondary);}
 
-/* ============ sections ============ */
-section.block{padding:56px 0;}
-.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
-.sec-ico{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:var(--radius-lg);background:var(--primary-soft);color:var(--primary);}
-.sec-ico svg{width:23px;height:23px;}
-.sec-head h2{font-size:clamp(24px,3.4vw,32px);letter-spacing:-.01em;margin:0;font-weight:700;}
-.sec-head .count{font-family:var(--font-num);font-weight:700;color:var(--text-muted);font-size:18px;margin-left:2px;}
-.sec-sub{color:var(--text-secondary);margin:0 0 28px 58px;font-size:15px;}
+.metarow{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:24px;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:var(--radius-full);background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);}
+.badge svg{width:14px;height:14px;color:var(--primary);}
+.badge .num{color:var(--text);}
+.ghbtn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text);background:var(--surface-elevated);border:1px solid var(--border-strong);padding:7px 14px;border-radius:var(--radius-full);transition:all var(--dur-fast);}
+.ghbtn:hover{background:var(--surface);transform:translateY(-1px);}
+.ghbtn svg{width:15px;height:15px;}
 
-/* ============ cards ============ */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px;}
-.card{
-  position:relative;overflow:hidden;background:var(--surface-elevated);
-  border:1px solid var(--border);border-radius:var(--radius-xl);padding:22px 22px 20px;
-  box-shadow:var(--shadow-sm);transition:transform var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out),border-color var(--dur-base);
-  --c:var(--primary);
-}
-.card::after{ /* speed-lines ornament */
-  content:"";position:absolute;top:18px;right:-8px;width:46px;height:14px;opacity:.5;pointer-events:none;
-  background:linear-gradient(var(--c),var(--c)) 100% 0/30px 2px no-repeat,
-            linear-gradient(var(--c),var(--c)) 100% 6px/42px 2px no-repeat,
-            linear-gradient(var(--c),var(--c)) 100% 12px/22px 2px no-repeat;
-  border-radius:2px;
-}
+/* ===== sections ===== */
+section.block{padding:40px 0 8px;}
+.sec-head{display:flex;align-items:center;gap:13px;margin-bottom:20px;}
+.sec-ico{flex:none;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:var(--radius-lg);background:color-mix(in srgb,var(--c,var(--primary)) 13%,transparent);color:var(--c,var(--primary));}
+.sec-ico svg{width:21px;height:21px;}
+.sec-head h2{font-size:clamp(21px,3vw,27px);letter-spacing:-.01em;margin:0;font-weight:700;}
+.sec-head .count{font-family:var(--font-num);font-weight:700;color:var(--text-muted);font-size:16px;margin-left:3px;}
+.sec-head .note{margin-left:auto;font-size:12.5px;color:var(--text-muted);max-width:30ch;text-align:right;}
+
+/* cards (skills) */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+.card{position:relative;overflow:hidden;background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-xl);padding:20px;box-shadow:var(--shadow-sm);transition:transform var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out),border-color var(--dur-base);--c:var(--primary);}
+.card::after{content:"";position:absolute;top:18px;right:-8px;width:46px;height:14px;opacity:.5;pointer-events:none;background:linear-gradient(var(--c),var(--c)) 100% 0/30px 2px no-repeat,linear-gradient(var(--c),var(--c)) 100% 6px/42px 2px no-repeat,linear-gradient(var(--c),var(--c)) 100% 12px/22px 2px no-repeat;}
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:color-mix(in srgb,var(--c) 45%,var(--border));}
-.card-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
-.card-ico{flex:none;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:var(--radius-md);
-  background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);}
-.card-ico svg{width:21px;height:21px;}
-.kind{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--c);background:color-mix(in srgb,var(--c) 13%,transparent);
-  padding:4px 9px;border-radius:var(--radius-full);transform:skewX(-8deg);}
-.kind span{display:inline-block;transform:skewX(8deg);}
+.card-ico{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:var(--radius-md);background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);margin-bottom:13px;}
+.card-ico svg{width:20px;height:20px;}
 .cmd{font-family:var(--font-mono);font-size:15px;font-weight:500;color:var(--text);}
 .cmd .slash{color:var(--c);}
-.tag{font-weight:600;font-size:14px;color:var(--text);margin:9px 0 6px;}
-.desc{font-size:14px;color:var(--text-secondary);line-height:1.58;margin:0;}
+.tag{font-weight:600;font-size:14px;margin:8px 0 5px;}
+.desc{font-size:13.5px;color:var(--text-secondary);line-height:1.55;margin:0;}
 
-/* ============ two ways ============ */
-.ways{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px;}
-.way{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;overflow:hidden;}
-.way::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--primary));}
-.way h3{margin:0 0 8px;font-size:18px;display:flex;align-items:center;gap:9px;}
-.way h3 svg{width:18px;height:18px;color:var(--c,var(--primary));}
-.way p{margin:0;color:var(--text-secondary);font-size:14.5px;}
+/* rows (commands + agents) */
+.rows{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.row{display:grid;grid-template-columns:auto 1fr;column-gap:12px;row-gap:2px;align-items:center;padding:12px 15px;background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-md);transition:border-color var(--dur-fast),background var(--dur-fast),transform var(--dur-fast);--c:var(--primary);}
+.row:hover{border-color:color-mix(in srgb,var(--c) 45%,var(--border));background:var(--surface);transform:translateY(-1px);}
+.r-ico{grid-row:1/3;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:var(--radius-sm);background:color-mix(in srgb,var(--c) 13%,transparent);color:var(--c);}
+.r-ico svg{width:17px;height:17px;}
+.r-cmd{font-family:var(--font-mono);font-size:13.5px;font-weight:500;color:var(--text);}
+.r-cmd .slash{color:var(--c);}
+.r-desc{font-size:12.5px;color:var(--text-secondary);line-height:1.4;}
 
-/* ============ install ============ */
-.steps{counter-reset:s;display:grid;gap:16px;margin-top:8px;}
-.step{position:relative;background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 20px 20px 64px;}
-.step::before{counter-increment:s;content:counter(s);position:absolute;left:18px;top:18px;
-  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-num);font-weight:700;font-size:15px;color:var(--on-primary);background:var(--primary);border-radius:var(--radius-md);}
-.step h4{margin:2px 0 12px;font-size:16px;}
-.step .cmdline{margin-top:0;display:flex;width:100%;}
-.note{margin-top:16px;color:var(--text-muted);font-size:13.5px;display:flex;gap:8px;align-items:flex-start;}
-.note svg{width:16px;height:16px;flex:none;margin-top:2px;color:var(--text-muted);}
-
-/* ============ footer ============ */
-footer{border-top:1px solid var(--border);padding:40px 0;margin-top:32px;color:var(--text-muted);font-size:14px;}
+/* ===== footer ===== */
+footer{border-top:1px solid var(--border);padding:34px 0;margin-top:48px;color:var(--text-muted);font-size:14px;}
 .frow{display:flex;flex-wrap:wrap;align-items:center;gap:16px;}
-.frow .brand{opacity:.9;}
 .flinks{margin-left:auto;display:flex;gap:18px;}
 .flinks a{color:var(--text-secondary);transition:color var(--dur-fast);}
 .flinks a:hover{color:var(--text);}
-.fmeta{margin-top:14px;font-size:13px;}
+.fmeta{margin-top:12px;font-size:13px;}
 .fmeta .num{color:var(--text-secondary);}
 
-/* ============ reveal animation ============ */
-.reveal{opacity:0;transform:translateY(16px);transition:opacity .5s var(--ease-out),transform .5s var(--ease-out);transition-delay:var(--d,0ms);}
+/* ===== reveal ===== */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .45s var(--ease-out),transform .45s var(--ease-out);transition-delay:var(--d,0ms);}
 .reveal.in{opacity:1;transform:none;}
 
-/* ============ responsive ============ */
-@media(max-width:860px){
+@media(max-width:820px){
   nav.links{display:none;}
-  .ways{grid-template-columns:1fr;}
-  .hero{padding:60px 0 48px;}
+  .rows{grid-template-columns:1fr;}
+  .sec-head .note{display:none;}
 }
 @media(max-width:560px){
   .wordmark{font-size:17px;}
-  .tools{gap:7px;}
   .swatches{display:none;}
   .grid{grid-template-columns:1fr;}
-  .badge .lbl-long{display:none;}
 }
 @media(prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important;}
@@ -276,23 +207,23 @@ footer{border-top:1px solid var(--border);padding:40px 0;margin-top:32px;color:v
     <a class="brand" href="#top" aria-label="mskills.denys.fast">
       <svg class="mark" viewBox="0 0 442 166" aria-hidden="true">
         <rect class="ln" x="41" y="47" width="231" height="22" rx="11"/>
-        <rect class="ln" x="0"  y="72" width="298" height="22" rx="11"/>
+        <rect class="ln" x="0" y="72" width="298" height="22" rx="11"/>
         <rect class="ln" x="21" y="97" width="253" height="22" rx="11"/>
-        <path class="cv-back"  d="M256 18 L418 83 L256 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="cv-back" d="M256 18 L418 83 L256 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
         <path class="cv-front" d="M182 18 L344 83 L182 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <span class="wordmark"><span class="svc">mskills</span><span class="dom">.denys.fast</span></span>
     </a>
     <nav class="links">
-      <a href="#skills" data-i18n="nav_skills">Скилы</a>
+      <a href="#plan" data-i18n="nav_plan">План</a>
+      <a href="#code" data-i18n="nav_code">Код</a>
       <a href="#commands" data-i18n="nav_commands">Команды</a>
       <a href="#agents" data-i18n="nav_agents">Агенты</a>
-      <a href="#install" data-i18n="nav_install">Установка</a>
     </nav>
     <div class="tools">
       <div class="swatches" role="group" aria-label="Theme">
-        <button class="sw light"    data-theme-set="light"    aria-label="Light" aria-pressed="true"></button>
-        <button class="sw cream"    data-theme-set="cream"    aria-label="Cream" aria-pressed="false"></button>
+        <button class="sw light" data-theme-set="light" aria-label="Light" aria-pressed="true"></button>
+        <button class="sw cream" data-theme-set="cream" aria-label="Cream" aria-pressed="false"></button>
         <button class="sw espresso" data-theme-set="espresso" aria-label="Espresso" aria-pressed="false"></button>
         <button class="sw obsidian" data-theme-set="obsidian" aria-label="Obsidian" aria-pressed="false"></button>
       </div>
@@ -311,69 +242,37 @@ footer{border-top:1px solid var(--border);padding:40px 0;margin-top:32px;color:v
 <section class="hero">
   <svg class="hero-mark" viewBox="0 0 442 166" aria-hidden="true">
     <rect class="ln" x="41" y="47" width="231" height="22" rx="11"/>
-    <rect class="ln" x="0"  y="72" width="298" height="22" rx="11"/>
+    <rect class="ln" x="0" y="72" width="298" height="22" rx="11"/>
     <rect class="ln" x="21" y="97" width="253" height="22" rx="11"/>
-    <path class="cv-back"  d="M256 18 L418 83 L256 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="cv-back" d="M256 18 L418 83 L256 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
     <path class="cv-front" d="M182 18 L344 83 L182 148" fill="none" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
   <div class="wrap">
     <span class="overline" data-i18n="hero_over">Плагин для Claude Code</span>
-    <h1 data-i18n="hero_title">Дисциплинированный <span class="grad">m_*</span>-набор, чтобы доводить софт до продакшна с Claude</h1>
+    <h1 data-i18n="hero_title">Дисциплинированный <span class="grad">m_*</span>-набор для Claude</h1>
     <p class="sub" data-i18n="hero_sub">План → выполнение → проверка. Код, инфра, деплой и браузерные тесты — из одного плагина.</p>
-    <div class="badges">
+
+    <div class="install">
+      <div class="install-label"><svg data-lucide="download"></svg><span data-i18n="install_label">Установка — вставь в Claude Code</span></div>
+      <div class="install-cmd">
+        <code><span class="slash">/</span>plugin marketplace add mapuamap/denys-fast-mskills
+<span class="slash">/</span>plugin install denys-fast-mskills@denys-fast-mskills</code>
+        <button class="copy" data-copy="/plugin marketplace add mapuamap/denys-fast-mskills&#10;/plugin install denys-fast-mskills@denys-fast-mskills"><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button>
+      </div>
+      <p class="install-hint" data-i18n="install_hint">Затем перезапусти Claude Code и запусти <code>/m_plan</code>.</p>
+    </div>
+
+    <div class="metarow">
       <span class="badge"><svg data-lucide="layers"></svg><span class="num">5</span> <span data-i18n="b_skills">скилов</span></span>
       <span class="badge"><svg data-lucide="terminal"></svg><span class="num">8</span> <span data-i18n="b_commands">команд</span></span>
       <span class="badge"><svg data-lucide="bot"></svg><span class="num">3</span> <span data-i18n="b_agents">агента</span></span>
       <span class="badge"><svg data-lucide="git-branch"></svg><span class="num">v2.0.0</span></span>
-      <span class="badge"><svg data-lucide="scale"></svg>Apache-2.0</span>
-    </div>
-    <div class="cta">
-      <a class="btn btn-primary" href="#install"><svg data-lucide="download"></svg><span data-i18n="cta_install">Установить</span></a>
-      <a class="btn btn-ghost" href="https://github.com/mapuamap/denys-fast-mskills" target="_blank" rel="noopener"><svg data-lucide="github"></svg><span data-i18n="cta_github">Открыть на GitHub</span></a>
+      <a class="ghbtn" href="https://github.com/mapuamap/denys-fast-mskills" target="_blank" rel="noopener"><svg data-lucide="github"></svg><span data-i18n="cta_github">GitHub</span></a>
     </div>
   </div>
 </section>
 
-<main class="wrap" id="content"><!-- sections injected here --></main>
-
-<section class="block wrap" id="ways-sec">
-  <div class="sec-head reveal">
-    <span class="sec-ico"><svg data-lucide="git-fork"></svg></span>
-    <h2 data-i18n="ways_title">Два способа планировать</h2>
-  </div>
-  <div class="ways">
-    <div class="way reveal" style="--c:var(--info)">
-      <h3><svg data-lucide="feather"></svg><span data-i18n="ways_light_t">Лёгкий</span></h3>
-      <p data-i18n="ways_light_d">Контекст в <code>infra.md</code> + <code>deploy.md</code>, управляется <code>/m_infr*</code> и <code>/m_deploy*</code>. Быстро, для устоявшихся проектов.</p>
-    </div>
-    <div class="way reveal" style="--c:var(--primary)">
-      <h3><svg data-lucide="list-checks"></svg><span data-i18n="ways_formal_t">Формальный</span></h3>
-      <p data-i18n="ways_formal_d">Конвейер артефактов <code>m_plan</code> с оракулом проверки (<code>09_verification.md</code>). Для крупных или рискованных изменений.</p>
-    </div>
-  </div>
-</section>
-
-<section class="block wrap" id="install">
-  <div class="sec-head reveal">
-    <span class="sec-ico"><svg data-lucide="download"></svg></span>
-    <h2 data-i18n="install_title">Установка</h2>
-  </div>
-  <div class="steps">
-    <div class="step reveal">
-      <h4 data-i18n="install_s1">Добавь маркетплейс</h4>
-      <div class="cmdline"><code>claude plugin marketplace add mapuamap/denys-fast-mskills</code><button class="copy" data-copy="claude plugin marketplace add mapuamap/denys-fast-mskills"><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button></div>
-    </div>
-    <div class="step reveal">
-      <h4 data-i18n="install_s2">Установи плагин</h4>
-      <div class="cmdline"><code>claude plugin install denys-fast-mskills@denys-fast-mskills</code><button class="copy" data-copy="claude plugin install denys-fast-mskills@denys-fast-mskills"><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button></div>
-    </div>
-    <div class="step reveal">
-      <h4 data-i18n="install_s3">Перезапусти Claude Code, затем…</h4>
-      <div class="cmdline"><code><span class="dim">$ </span>/m_setup<span class="dim">   ·   </span>/m_plan &lt;task&gt;</code><button class="copy" data-copy="/m_plan "><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button></div>
-    </div>
-  </div>
-  <p class="note"><svg data-lucide="info"></svg><span data-i18n="install_note">Внутри Claude Code можно также использовать команды <code>/plugin marketplace add</code> и <code>/plugin install</code>.</span></p>
-</section>
+<main class="wrap" id="content"><!-- injected --></main>
 
 <footer>
   <div class="wrap">
@@ -399,219 +298,152 @@ footer{border-top:1px solid var(--border);padding:40px 0;margin-top:32px;color:v
 
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>
-/* ---------------- data ---------------- */
-var CATS = {
-  plan:  {color:'var(--primary)'},
-  code:  {color:'var(--success)'},
-  infra: {color:'var(--warning)'},
-  test:  {color:'var(--info)'},
-  agent: {color:'var(--secondary)'}
-};
-var DATA = [
-  // ---- skills ----
-  {kind:'skill', cat:'plan', icon:'clipboard-list', cmd:'/m_plan',
-   en:{tag:'Plan → execute → verify', desc:'Turns a task into a right-sized plan, runs it, and proves it is done against a checklist.'},
-   ru:{tag:'План → выполнение → проверка', desc:'Превращает задачу в план нужного размера, выполняет его и доказывает готовность по чек-листу.'}},
-  {kind:'skill', cat:'plan', icon:'circle-play', cmd:'/m_plan_implement',
-   en:{tag:'Execute an existing plan', desc:'Finishes a plan from m_plan with a real deploy + smoke gate, then reports Done / Changed / Not-done.'},
-   ru:{tag:'Выполнить готовый план', desc:'Доводит план от m_plan до конца с реальным деплоем и smoke-проверкой, затем отчёт Сделано / Изменено / Не сделано.'}},
-  {kind:'skill', cat:'code', icon:'package-plus', cmd:'/m_code_init_project',
-   en:{tag:'Make a repo AI-ready', desc:'Sets up CLAUDE.md, architecture boundaries, seams and first tests so a repo is safe for AI work.'},
-   ru:{tag:'Подготовить репозиторий к AI', desc:'Готовит CLAUDE.md, границы архитектуры, швы и первые тесты — чтобы репозиторий был безопасен для AI.'}},
-  {kind:'skill', cat:'code', icon:'wrench', cmd:'/m_code_refactor',
-   en:{tag:'Refactor in safe slices', desc:'Restructures code in small, test-backed slices. Modes: preserve (legacy) or may-change (architecture).'},
-   ru:{tag:'Рефакторинг безопасными срезами', desc:'Перестраивает код малыми срезами под тестами. Режимы: preserve (легаси) или may-change (архитектура).'}},
-  {kind:'skill', cat:'code', icon:'shield-check', cmd:'/m_code_rules_audit',
-   en:{tag:'Audit against your rules', desc:'Checks code against the rules in your repo plus safe checks. Report-only; pairs with /code-review.'},
-   ru:{tag:'Аудит по твоим правилам', desc:'Проверяет код по правилам твоего репозитория и безопасным проверкам. Только отчёт; в пару к /code-review.'}},
-  // ---- commands ----
-  {kind:'command', cat:'infra', icon:'settings-2', cmd:'/m_setup',
-   en:{tag:'Install the m_code framework', desc:'Drops rules, hooks and ai-check.sh into the current repo. Run once per project.'},
-   ru:{tag:'Установить m_code-фреймворк', desc:'Кладёт правила, хуки и ai-check.sh в текущий репозиторий. Один раз на проект.'}},
-  {kind:'command', cat:'infra', icon:'server-cog', cmd:'/m_infr_init',
-   en:{tag:'Create infra.md', desc:'Captures servers, network and dependencies into one infra.md file.'},
-   ru:{tag:'Создать infra.md', desc:'Собирает серверы, сеть и зависимости в один файл infra.md.'}},
-  {kind:'command', cat:'infra', icon:'server', cmd:'/m_infr',
-   en:{tag:'Use infra context', desc:'Applies the infra.md context to the current task.'},
-   ru:{tag:'Использовать инфра-контекст', desc:'Применяет контекст infra.md к текущей задаче.'}},
-  {kind:'command', cat:'infra', icon:'file-cog', cmd:'/m_deploy_init',
-   en:{tag:'Create deploy.md', desc:'Writes how the project ships: targets, steps, rollback.'},
-   ru:{tag:'Создать deploy.md', desc:'Описывает, как проект выкатывается: цели, шаги, откат.'}},
-  {kind:'command', cat:'infra', icon:'list-checks', cmd:'/m_deploy_check',
-   en:{tag:'Preflight the deploy', desc:'Dry review of deploy.md and current state before shipping.'},
-   ru:{tag:'Префлайт деплоя', desc:'Сухой разбор deploy.md и состояния перед выкаткой.'}},
-  {kind:'command', cat:'infra', icon:'rocket', cmd:'/m_deploy',
-   en:{tag:'Ship it', desc:'Runs the deploy from deploy.md and checks the result (logger-mm-aware).'},
-   ru:{tag:'Выкатить', desc:'Выполняет деплой по deploy.md и проверяет результат (через logger-mm).'}},
-  {kind:'command', cat:'test', icon:'bug', cmd:'/m_playwright_fulltest',
-   en:{tag:'Full browser test loop', desc:'plan → deploy → test in a real browser → fix → re-deploy, until green.'},
-   ru:{tag:'Полный браузерный прогон', desc:'план → деплой → тест в реальном браузере → починка → передеплой, до зелёного.'}},
-  {kind:'command', cat:'test', icon:'message-square', cmd:'/m_explain',
-   en:{tag:'Explain in plain language', desc:'Sums up what was just done, in plain non-technical words.'},
-   ru:{tag:'Объяснить по-человечески', desc:'Резюмирует только что сделанное простыми словами.'}},
-  // ---- agents ----
-  {kind:'agent', cat:'agent', icon:'radar', cmd:'m_code_context_scout',
-   en:{tag:'Wide codebase scan', desc:'Maps a big or unfamiliar codebase in a side context and returns a compact map.'},
-   ru:{tag:'Широкий скан кодовой базы', desc:'Картирует большую или незнакомую базу в отдельном контексте и отдаёт компактную карту.'}},
-  {kind:'agent', cat:'agent', icon:'flask-conical', cmd:'m_code_test_runner',
-   en:{tag:'Run checks, return summary', desc:'Runs build/test/lint in isolation and returns only a short pass/fail.'},
-   ru:{tag:'Прогнать проверки, вернуть итог', desc:'Гоняет build/test/lint изолированно и отдаёт короткий pass/fail.'}},
-  {kind:'agent', cat:'agent', icon:'layers', cmd:'m_code_architecture_reviewer',
-   en:{tag:'Independent boundary review', desc:'A second pass on dependencies, seams and coupling after big changes.'},
-   ru:{tag:'Независимое ревью границ', desc:'Второй взгляд на зависимости, швы и связанность после крупных правок.'}}
+var CATS={plan:'var(--primary)',code:'var(--success)',infra:'var(--warning)',test:'var(--info)',agent:'var(--secondary)'};
+var DATA=[
+  {kind:'skill',cat:'plan',icon:'clipboard-list',cmd:'/m_plan',
+   en:{tag:'Plan → execute → verify',desc:'Turns a task into a right-sized plan, runs it, and proves it is done against a checklist.'},
+   ru:{tag:'План → выполнение → проверка',desc:'Превращает задачу в план нужного размера, выполняет его и доказывает готовность по чек-листу.'}},
+  {kind:'skill',cat:'plan',icon:'circle-play',cmd:'/m_plan_implement',
+   en:{tag:'Execute an existing plan',desc:'Finishes a plan from m_plan with a real deploy + smoke gate, then reports Done / Changed / Not-done.'},
+   ru:{tag:'Выполнить готовый план',desc:'Доводит план от m_plan до конца с реальным деплоем и smoke-проверкой, затем отчёт Сделано / Изменено / Не сделано.'}},
+  {kind:'skill',cat:'code',icon:'package-plus',cmd:'/m_code_init_project',
+   en:{tag:'Make a repo AI-ready',desc:'Sets up CLAUDE.md, architecture boundaries, seams and first tests so a repo is safe for AI work.'},
+   ru:{tag:'Подготовить репозиторий к AI',desc:'Готовит CLAUDE.md, границы архитектуры, швы и первые тесты — чтобы репозиторий был безопасен для AI.'}},
+  {kind:'skill',cat:'code',icon:'wrench',cmd:'/m_code_refactor',
+   en:{tag:'Refactor in safe slices',desc:'Restructures code in small, test-backed slices. Modes: preserve (legacy) or may-change (architecture).'},
+   ru:{tag:'Рефакторинг безопасными срезами',desc:'Перестраивает код малыми срезами под тестами. Режимы: preserve (легаси) или may-change (архитектура).'}},
+  {kind:'skill',cat:'code',icon:'shield-check',cmd:'/m_code_rules_audit',
+   en:{tag:'Audit against your rules',desc:'Checks code against the rules in your repo plus safe checks. Report-only; pairs with /code-review.'},
+   ru:{tag:'Аудит по твоим правилам',desc:'Проверяет код по правилам твоего репозитория и безопасным проверкам. Только отчёт; в пару к /code-review.'}},
+  {kind:'command',cat:'infra',icon:'settings-2',cmd:'/m_setup',
+   en:{tag:'Install the m_code framework',desc:'Drops rules, hooks and ai-check.sh into the current repo. Once per project.'},
+   ru:{tag:'Установить m_code-фреймворк',desc:'Кладёт правила, хуки и ai-check.sh в репозиторий. Один раз на проект.'}},
+  {kind:'command',cat:'infra',icon:'server-cog',cmd:'/m_infr_init',
+   en:{tag:'Create infra.md',desc:'Captures servers, network and dependencies into one infra.md file.'},
+   ru:{tag:'Создать infra.md',desc:'Собирает серверы, сеть и зависимости в один файл infra.md.'}},
+  {kind:'command',cat:'infra',icon:'server',cmd:'/m_infr',
+   en:{tag:'Use infra context',desc:'Applies the infra.md context to the current task.'},
+   ru:{tag:'Инфра-контекст',desc:'Применяет контекст infra.md к текущей задаче.'}},
+  {kind:'command',cat:'infra',icon:'file-cog',cmd:'/m_deploy_init',
+   en:{tag:'Create deploy.md',desc:'Writes how the project ships: targets, steps, rollback.'},
+   ru:{tag:'Создать deploy.md',desc:'Описывает выкатку: цели, шаги, откат.'}},
+  {kind:'command',cat:'infra',icon:'list-checks',cmd:'/m_deploy_check',
+   en:{tag:'Preflight the deploy',desc:'Dry review of deploy.md and state before shipping.'},
+   ru:{tag:'Префлайт деплоя',desc:'Сухой разбор deploy.md и состояния перед выкаткой.'}},
+  {kind:'command',cat:'infra',icon:'rocket',cmd:'/m_deploy',
+   en:{tag:'Ship it',desc:'Runs the deploy from deploy.md and checks the result (logger-mm-aware).'},
+   ru:{tag:'Выкатить',desc:'Деплой по deploy.md с проверкой результата (через logger-mm).'}},
+  {kind:'command',cat:'test',icon:'bug',cmd:'/m_playwright_fulltest',
+   en:{tag:'Full browser test loop',desc:'plan → deploy → test in a real browser → fix → re-deploy, until green.'},
+   ru:{tag:'Браузерный прогон',desc:'план → деплой → тест в реальном браузере → починка → передеплой, до зелёного.'}},
+  {kind:'command',cat:'test',icon:'message-square',cmd:'/m_explain',
+   en:{tag:'Explain in plain language',desc:'Sums up what was just done, in plain non-technical words.'},
+   ru:{tag:'Объяснить по-человечески',desc:'Резюмирует только что сделанное простыми словами.'}},
+  {kind:'agent',cat:'agent',icon:'radar',cmd:'m_code_context_scout',
+   en:{tag:'Wide codebase scan',desc:'Maps a big or unfamiliar codebase in a side context and returns a compact map.'},
+   ru:{tag:'Широкий скан базы',desc:'Картирует большую базу в отдельном контексте и отдаёт компактную карту.'}},
+  {kind:'agent',cat:'agent',icon:'flask-conical',cmd:'m_code_test_runner',
+   en:{tag:'Run checks, return summary',desc:'Runs build/test/lint in isolation and returns only a short pass/fail.'},
+   ru:{tag:'Прогон проверок',desc:'Гоняет build/test/lint изолированно и отдаёт короткий pass/fail.'}},
+  {kind:'agent',cat:'agent',icon:'layers',cmd:'m_code_architecture_reviewer',
+   en:{tag:'Independent boundary review',desc:'A second pass on dependencies, seams and coupling after big changes.'},
+   ru:{tag:'Ревью границ',desc:'Второй взгляд на зависимости, швы и связанность после крупных правок.'}}
 ];
 
-var SECTIONS = [
-  {kind:'skill',   id:'skills',   icon:'layers',   en:{t:'Skills',   s:'Global workflows you invoke with a slash command.'}, ru:{t:'Скилы',   s:'Глобальные воркфлоу, вызываются слеш-командой.'}},
-  {kind:'command', id:'commands', icon:'terminal', en:{t:'Commands', s:'User-triggered commands for setup, infra, deploy and tests.'}, ru:{t:'Команды', s:'Пользовательские команды для сетапа, инфры, деплоя и тестов.'}},
-  {kind:'agent',   id:'agents',   icon:'bot',      en:{t:'Agents',   s:'Read-only helpers the skills delegate to, in isolated context.'}, ru:{t:'Агенты',   s:'Read-only помощники в изолированном контексте, к которым обращаются скилы.'}}
+var GROUPS=[
+  {id:'plan',    layout:'card', icon:'route',        color:'var(--primary)',  sel:function(d){return d.cat==='plan';}},
+  {id:'code',    layout:'card', icon:'shield-check', color:'var(--success)',  sel:function(d){return d.cat==='code';}},
+  {id:'commands',layout:'rows', icon:'terminal',     color:'var(--warning)',  sel:function(d){return d.kind==='command';}},
+  {id:'agents',  layout:'rows', icon:'bot',          color:'var(--secondary)',sel:function(d){return d.kind==='agent';}}
 ];
 
-var I18N = {
-  ru:{nav_skills:'Скилы',nav_commands:'Команды',nav_agents:'Агенты',nav_install:'Установка',
+var I18N={
+  ru:{nav_plan:'План',nav_code:'Код',nav_commands:'Команды',nav_agents:'Агенты',
     hero_over:'Плагин для Claude Code',
-    hero_title:'Дисциплинированный <span class="grad">m_*</span>-набор, чтобы доводить софт до продакшна с Claude',
+    hero_title:'Дисциплинированный <span class="grad">m_*</span>-набор для Claude',
     hero_sub:'План → выполнение → проверка. Код, инфра, деплой и браузерные тесты — из одного плагина.',
-    b_skills:'скилов',b_commands:'команд',b_agents:'агента',
-    cta_install:'Установить',cta_github:'Открыть на GitHub',
-    ways_title:'Два способа планировать',ways_light_t:'Лёгкий',
-    ways_light_d:'Контекст в <code>infra.md</code> + <code>deploy.md</code>, управляется <code>/m_infr*</code> и <code>/m_deploy*</code>. Быстро, для устоявшихся проектов.',
-    ways_formal_t:'Формальный',
-    ways_formal_d:'Конвейер артефактов <code>m_plan</code> с оракулом проверки (<code>09_verification.md</code>). Для крупных или рискованных изменений.',
-    install_title:'Установка',install_s1:'Добавь маркетплейс',install_s2:'Установи плагин',install_s3:'Перезапусти Claude Code, затем…',
-    install_note:'Внутри Claude Code можно также использовать команды <code>/plugin marketplace add</code> и <code>/plugin install</code>.',
-    footer_made:'Часть экосистемы denys.fast',copy:'Копировать',copied:'Скопировано',
-    kind_skill:'скил',kind_command:'команда',kind_agent:'агент'},
-  en:{nav_skills:'Skills',nav_commands:'Commands',nav_agents:'Agents',nav_install:'Install',
+    install_label:'Установка — вставь в Claude Code',
+    install_hint:'Затем перезапусти Claude Code и запусти <code>/m_plan</code>.',
+    b_skills:'скилов',b_commands:'команд',b_agents:'агента',cta_github:'GitHub',
+    g_plan:'Планирование',g_code:'Кодовые скилы',g_commands:'Команды',g_agents:'Агенты',
+    agents_note:'Read-only помощники — их вызывают скилы сами.',
+    copy:'Копировать',copied:'Скопировано',footer_made:'Часть экосистемы denys.fast'},
+  en:{nav_plan:'Plan',nav_code:'Code',nav_commands:'Commands',nav_agents:'Agents',
     hero_over:'Claude Code plugin',
-    hero_title:'A disciplined <span class="grad">m_*</span> toolkit for shipping real software with Claude',
+    hero_title:'A disciplined <span class="grad">m_*</span> toolkit for Claude',
     hero_sub:'Plan → execute → verify. Code, infra, deploy and browser tests — from one installed plugin.',
-    b_skills:'skills',b_commands:'commands',b_agents:'agents',
-    cta_install:'Install',cta_github:'View on GitHub',
-    ways_title:'Two ways to plan',ways_light_t:'Lightweight',
-    ways_light_d:'<code>infra.md</code> + <code>deploy.md</code> context, driven by <code>/m_infr*</code> and <code>/m_deploy*</code>. Fast, for established projects.',
-    ways_formal_t:'Formal',
-    ways_formal_d:'The <code>m_plan</code> artifact pipeline with a verification oracle (<code>09_verification.md</code>). For substantial or risky changes.',
-    install_title:'Install',install_s1:'Add the marketplace',install_s2:'Install the plugin',install_s3:'Restart Claude Code, then…',
-    install_note:'Inside Claude Code you can also use the <code>/plugin marketplace add</code> and <code>/plugin install</code> commands.',
-    footer_made:'Part of the denys.fast ecosystem',copy:'Copy',copied:'Copied',
-    kind_skill:'skill',kind_command:'command',kind_agent:'agent'}
+    install_label:'Install — paste into Claude Code',
+    install_hint:'Then restart Claude Code and run <code>/m_plan</code>.',
+    b_skills:'skills',b_commands:'commands',b_agents:'agents',cta_github:'GitHub',
+    g_plan:'Planning',g_code:'Code skills',g_commands:'Commands',g_agents:'Agents',
+    agents_note:'Read-only helpers — the skills call them automatically.',
+    copy:'Copy',copied:'Copied',footer_made:'Part of the denys.fast ecosystem'}
 };
 
-var lang = document.documentElement.getAttribute('lang') || 'ru';
-if (lang !== 'en' && lang !== 'ru') lang = 'ru';
+var lang=document.documentElement.getAttribute('lang')||'ru';
+if(lang!=='en'&&lang!=='ru')lang='ru';
 
-/* ---------------- render cards ---------------- */
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function cardHTML(it){
-  var L=it[lang], c=CATS[it.cat].color;
-  var kindLabel=I18N[lang]['kind_'+it.kind];
-  var isSlash=it.kind!=='agent';
-  var cmd= isSlash
-    ? '<span class="slash">/</span>'+esc(it.cmd.slice(1))
-    : esc(it.cmd);
+function cmdHTML(it,cls){var isSlash=it.kind!=='agent';return isSlash?'<span class="slash">/</span>'+esc(it.cmd.slice(1)):esc(it.cmd);}
+function cardHTML(it){var L=it[lang],c=CATS[it.cat];
   return '<article class="card reveal" style="--c:'+c+'">'+
-    '<div class="card-top">'+
-      '<span class="card-ico"><svg data-lucide="'+it.icon+'"></svg></span>'+
-      '<span class="kind"><span>'+kindLabel+'</span></span>'+
-    '</div>'+
-    '<div class="cmd">'+cmd+'</div>'+
+    '<span class="card-ico"><svg data-lucide="'+it.icon+'"></svg></span>'+
+    '<div class="cmd">'+cmdHTML(it)+'</div>'+
     '<div class="tag">'+esc(L.tag)+'</div>'+
-    '<p class="desc">'+esc(L.desc)+'</p>'+
-  '</article>';
-}
+    '<p class="desc">'+esc(L.desc)+'</p></article>';}
+function rowHTML(it){var L=it[lang],c=CATS[it.cat];
+  return '<div class="row reveal" style="--c:'+c+'">'+
+    '<span class="r-ico"><svg data-lucide="'+it.icon+'"></svg></span>'+
+    '<div class="r-cmd">'+cmdHTML(it)+'</div>'+
+    '<div class="r-desc">'+esc(L.desc)+'</div></div>';}
+
 function renderSections(){
-  var root=document.getElementById('content');
-  var html='';
-  SECTIONS.forEach(function(sec){
-    var items=DATA.filter(function(d){return d.kind===sec.kind;});
-    var S=sec[lang];
-    html+='<section class="block" id="'+sec.id+'">'+
-      '<div class="sec-head reveal">'+
-        '<span class="sec-ico"><svg data-lucide="'+sec.icon+'"></svg></span>'+
-        '<h2>'+esc(S.t)+' <span class="count">'+items.length+'</span></h2>'+
-      '</div>'+
-      '<p class="sec-sub reveal">'+esc(S.s)+'</p>'+
-      '<div class="grid">'+items.map(cardHTML).join('')+'</div>'+
-    '</section>';
+  var root=document.getElementById('content'),html='';
+  GROUPS.forEach(function(g){
+    var items=DATA.filter(g.sel),T=I18N[lang]['g_'+g.id];
+    var note=(g.id==='agents')?'<span class="note">'+I18N[lang].agents_note+'</span>':'';
+    var body=(g.layout==='card')
+      ? '<div class="grid">'+items.map(cardHTML).join('')+'</div>'
+      : '<div class="rows">'+items.map(rowHTML).join('')+'</div>';
+    html+='<section class="block" id="'+g.id+'" style="--c:'+g.color+'">'+
+      '<div class="sec-head reveal"><span class="sec-ico"><svg data-lucide="'+g.icon+'"></svg></span>'+
+      '<h2>'+esc(T)+' <span class="count">'+items.length+'</span></h2>'+note+'</div>'+
+      body+'</section>';
   });
   root.innerHTML=html;
 }
 
-/* ---------------- i18n for static chrome ---------------- */
 function applyLang(){
   document.documentElement.setAttribute('lang',lang);
-  document.querySelectorAll('[data-i18n]').forEach(function(el){
-    var k=el.getAttribute('data-i18n'), v=I18N[lang][k];
-    if(v!=null) el.innerHTML=v;
-  });
-  document.querySelectorAll('[data-lang-set]').forEach(function(b){
-    b.setAttribute('aria-pressed', String(b.getAttribute('data-lang-set')===lang));
-  });
+  document.querySelectorAll('[data-i18n]').forEach(function(el){var v=I18N[lang][el.getAttribute('data-i18n')];if(v!=null)el.innerHTML=v;});
+  document.querySelectorAll('[data-lang-set]').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-lang-set')===lang));});
   renderSections();
-  if(window.lucide) lucide.createIcons();
+  if(window.lucide)lucide.createIcons();
   observe();
 }
-
-/* ---------------- theme ---------------- */
 function setTheme(t){
-  if(t==='light') document.documentElement.removeAttribute('data-theme');
+  if(t==='light')document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme',t);
   try{localStorage.setItem('df-theme',t);}catch(e){}
-  document.querySelectorAll('[data-theme-set]').forEach(function(b){
-    b.setAttribute('aria-pressed', String(b.getAttribute('data-theme-set')===t));
-  });
+  document.querySelectorAll('[data-theme-set]').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-theme-set')===t));});
 }
-
-/* ---------------- reveal observer ---------------- */
 var io;
 function observe(){
   var els=document.querySelectorAll('.reveal:not(.in)');
   if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in');});return;}
-  if(!io){
-    io=new IntersectionObserver(function(entries){
-      entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target);} });
-    },{rootMargin:'0px 0px -8% 0px',threshold:.08});
-  }
-  var i=0;
-  els.forEach(function(e){
-    var grid=e.closest('.grid');
-    if(grid){ e.style.setProperty('--d',((i%3)*70)+'ms'); i++; }
-    io.observe(e);
-  });
+  if(!io)io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}});},{rootMargin:'0px 0px -6% 0px',threshold:.06});
+  var i=0;els.forEach(function(e){var box=e.closest('.grid,.rows');if(box){e.style.setProperty('--d',((i%4)*55)+'ms');i++;}io.observe(e);});
 }
-
-/* ---------------- copy ---------------- */
 document.addEventListener('click',function(ev){
-  var b=ev.target.closest('.copy'); if(!b) return;
-  var txt=b.getAttribute('data-copy');
-  navigator.clipboard.writeText(txt).then(function(){
-    b.classList.add('ok');
-    var span=b.querySelector('span'); var old=span?span.textContent:'';
-    if(span) span.textContent=I18N[lang].copied;
-    setTimeout(function(){ b.classList.remove('ok'); if(span) span.textContent=I18N[lang].copy; },1400);
+  var b=ev.target.closest('.copy');if(!b)return;
+  navigator.clipboard.writeText(b.getAttribute('data-copy')).then(function(){
+    b.classList.add('ok');var s=b.querySelector('span');if(s)s.textContent=I18N[lang].copied;
+    setTimeout(function(){b.classList.remove('ok');if(s)s.textContent=I18N[lang].copy;},1400);
   });
 });
-
-/* ---------------- wire controls ---------------- */
-document.querySelectorAll('[data-theme-set]').forEach(function(b){
-  b.addEventListener('click',function(){ setTheme(b.getAttribute('data-theme-set')); });
-});
-document.querySelectorAll('[data-lang-set]').forEach(function(b){
-  b.addEventListener('click',function(){
-    lang=b.getAttribute('data-lang-set');
-    try{localStorage.setItem('df-lang',lang);}catch(e){}
-    applyLang();
-  });
-});
-
-/* ---------------- init ---------------- */
-(function(){
-  var saved='light';
-  try{ saved=localStorage.getItem('df-theme')||'light'; }catch(e){}
-  setTheme(saved);
-  applyLang();
-})();
+document.querySelectorAll('[data-theme-set]').forEach(function(b){b.addEventListener('click',function(){setTheme(b.getAttribute('data-theme-set'));});});
+document.querySelectorAll('[data-lang-set]').forEach(function(b){b.addEventListener('click',function(){lang=b.getAttribute('data-lang-set');try{localStorage.setItem('df-lang',lang);}catch(e){}applyLang();});});
+(function(){var s='light';try{s=localStorage.getItem('df-theme')||'light';}catch(e){}setTheme(s);applyLang();})();
 </script>
 </body>
 </html>
