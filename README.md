@@ -20,15 +20,19 @@ This repo is its own plugin marketplace:
 
 Then restart Claude Code (or reload plugins).
 
-### Claude Desktop / claude.ai — skills only
+### Claude Desktop — add the marketplace in the UI
 
-Desktop and the web app can't add marketplaces; they install Agent Skills as uploaded `.zip` files, and only the **skills** carry over (the `m_*` commands and the agents are Claude Code-only).
+Desktop has a Plugins UI — no zips needed. **Customize → Plugins → Add marketplace**, paste the repo, then **Install**:
 
-1. Enable code execution (Settings → Capabilities).
-2. **Customize → Skills → + → Create skill → Upload**.
-3. Upload the per-skill zips from [`docs/skills-pack/`](docs/skills-pack/) — one at a time.
+```
+mapuamap/denys-fast-mskills
+```
 
-Those zips are generated from `skills/` by `scripts/build_skills_pack.py` (it drops `disable-model-invocation` so the skills are model-invocable off Claude Code).
+You get the skills; slash commands and sub-agents are Claude Code-only and stay greyed out.
+
+### claude.ai / no-plugin surfaces — skills as `.zip` (fallback)
+
+Where the Plugins UI isn't available, install the skills individually: **Customize → Skills → + → Create skill → Upload**, using the per-skill zips in [`docs/skills-pack/`](docs/skills-pack/). They're generated from `skills/` by `scripts/build_skills_pack.py` (it strips `disable-model-invocation` so the skills are model-invocable off Claude Code).
 
 ## What's inside
 

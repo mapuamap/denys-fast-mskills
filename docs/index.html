@@ -144,6 +144,12 @@ nav.links a:hover{color:var(--text);background:var(--surface);}
 .dl:hover{border-color:var(--primary);color:var(--primary);transform:translateY(-1px);}
 .dl svg{width:13px;height:13px;}
 .desk-note{margin:12px 0 0;font-size:12px;color:var(--text-muted);}
+.desk-fallback{margin-top:12px;font-size:12.5px;}
+.desk-fallback summary{cursor:pointer;color:var(--text-secondary);list-style:none;}
+.desk-fallback summary::-webkit-details-marker{display:none;}
+.desk-fallback summary::before{content:"\203A  ";color:var(--text-muted);}
+.desk-fallback[open] summary::before{content:"\02C5  ";}
+.desk-fallback summary:hover{color:var(--text);}
 
 .metarow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:9px;margin-top:24px;}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:var(--radius-full);background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);}
@@ -268,15 +274,22 @@ footer{border-top:1px solid var(--border);padding:34px 0;margin-top:48px;color:v
         <p class="install-hint" data-i18n="install_hint">Затем перезапусти Claude Code и запусти <code>/m_plan</code>.</p>
       </div>
       <div class="ipanel" data-panel="desk">
-        <p class="desk-steps" data-i18n="desk_steps">Включи code execution, затем Customize → Skills → + → Upload и загрузи .zip ниже.</p>
-        <div class="dl-row">
-          <a class="dl" href="skills-pack/m_plan.zip" download><svg data-lucide="download"></svg>m_plan</a>
-          <a class="dl" href="skills-pack/m_plan_implement.zip" download><svg data-lucide="download"></svg>m_plan_implement</a>
-          <a class="dl" href="skills-pack/m_code_init_project.zip" download><svg data-lucide="download"></svg>m_code_init_project</a>
-          <a class="dl" href="skills-pack/m_code_refactor.zip" download><svg data-lucide="download"></svg>m_code_refactor</a>
-          <a class="dl" href="skills-pack/m_code_rules_audit.zip" download><svg data-lucide="download"></svg>m_code_rules_audit</a>
+        <p class="desk-steps" data-i18n="desk_steps">Customize → Plugins → Add marketplace — вставь репозиторий и нажми Install:</p>
+        <div class="install-cmd">
+          <code>mapuamap/denys-fast-mskills</code>
+          <button class="copy" data-copy="mapuamap/denys-fast-mskills"><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button>
         </div>
-        <p class="desk-note" data-i18n="desk_note">Команды и агенты — только в Claude Code; на Desktop/web их нет.</p>
+        <p class="desk-note" data-i18n="desk_note">Команды и агенты — только в Claude Code; на Desktop/web доступны скилы.</p>
+        <details class="desk-fallback">
+          <summary data-i18n="desk_fallback">Нет «Add marketplace»? Загрузи скилы как .zip (Customize → Skills → Upload):</summary>
+          <div class="dl-row">
+            <a class="dl" href="skills-pack/m_plan.zip" download><svg data-lucide="download"></svg>m_plan</a>
+            <a class="dl" href="skills-pack/m_plan_implement.zip" download><svg data-lucide="download"></svg>m_plan_implement</a>
+            <a class="dl" href="skills-pack/m_code_init_project.zip" download><svg data-lucide="download"></svg>m_code_init_project</a>
+            <a class="dl" href="skills-pack/m_code_refactor.zip" download><svg data-lucide="download"></svg>m_code_refactor</a>
+            <a class="dl" href="skills-pack/m_code_rules_audit.zip" download><svg data-lucide="download"></svg>m_code_rules_audit</a>
+          </div>
+        </details>
       </div>
     </div>
 
@@ -378,8 +391,9 @@ var I18N={
     install_label:'Установка — вставь в Claude Code',
     install_hint:'Затем перезапусти Claude Code и запусти <code>/m_plan</code>.',
     tab_code:'Claude Code',tab_desktop:'Claude Desktop / web',
-    desk_steps:'Включи code execution, затем Customize → Skills → + → Upload и загрузи .zip ниже.',
-    desk_note:'Команды и агенты — только в Claude Code; на Desktop/web их нет.',
+    desk_steps:'Customize → Plugins → Add marketplace — вставь репозиторий и нажми Install:',
+    desk_note:'Команды и агенты — только в Claude Code; на Desktop/web доступны скилы.',
+    desk_fallback:'Нет «Add marketplace»? Загрузи скилы как .zip (Customize → Skills → Upload):',
     b_skills:'скилов',b_commands:'команд',b_agents:'агента',cta_github:'GitHub',
     g_plan:'Планирование',g_code:'Кодовые скилы',g_commands:'Команды',g_agents:'Агенты',
     agents_note:'Read-only помощники — их вызывают скилы сами.',
@@ -391,8 +405,9 @@ var I18N={
     install_label:'Install — paste into Claude Code',
     install_hint:'Then restart Claude Code and run <code>/m_plan</code>.',
     tab_code:'Claude Code',tab_desktop:'Claude Desktop / web',
-    desk_steps:'Enable code execution, then Customize → Skills → + → Upload and add the .zip files below.',
-    desk_note:'Commands and agents are Claude Code only — not available on Desktop/web.',
+    desk_steps:'Customize → Plugins → Add marketplace — paste the repo and click Install:',
+    desk_note:'Commands and agents are Claude Code only; on Desktop/web you get the skills.',
+    desk_fallback:"No 'Add marketplace'? Upload the skills as .zip (Customize → Skills → Upload):",
     b_skills:'skills',b_commands:'commands',b_agents:'agents',cta_github:'GitHub',
     g_plan:'Planning',g_code:'Code skills',g_commands:'Commands',g_agents:'Agents',
     agents_note:'Read-only helpers — the skills call them automatically.',
