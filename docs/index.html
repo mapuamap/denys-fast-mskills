@@ -126,6 +126,7 @@ nav.links a:hover{color:var(--text);background:var(--surface);}
 .install-label svg{width:15px;height:15px;color:var(--primary);}
 .install-cmd{display:flex;align-items:stretch;background:var(--surface-elevated);border:1px solid var(--border-strong);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-md);}
 .install-cmd code{flex:1;min-width:0;padding:13px 16px;font-size:13px;line-height:1.85;color:var(--text);white-space:pre;overflow-x:auto;}
+.prompt-cmd code{white-space:pre-wrap;overflow-x:visible;line-height:1.6;}
 .install-cmd code .slash{color:var(--primary);}
 .install-cmd .copy{flex:none;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);font-size:12px;font-weight:600;color:var(--text-secondary);background:var(--surface);border:0;border-left:1px solid var(--border);padding:0 15px;cursor:pointer;transition:color var(--dur-fast),background var(--dur-fast);}
 .install-cmd .copy:hover{color:var(--text);background:var(--surface-sunken);}
@@ -266,11 +267,19 @@ footer{border-top:1px solid var(--border);padding:34px 0;margin-top:48px;color:v
         <button class="itab" role="tab" data-tab="desk" aria-selected="false" data-i18n="tab_desktop">Claude Desktop / web</button>
       </div>
       <div class="ipanel on" data-panel="code">
-        <div class="install-cmd">
-          <code><span class="slash">/</span>plugin marketplace add mapuamap/denys-fast-mskills
-<span class="slash">/</span>plugin install denys-fast-mskills@denys-fast-mskills</code>
-          <button class="copy" data-copy="/plugin marketplace add mapuamap/denys-fast-mskills&#10;/plugin install denys-fast-mskills@denys-fast-mskills"><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button>
+        <p class="desk-steps" data-i18n="prompt_label">Вставь промпт в Claude Code — он всё поставит сам:</p>
+        <div class="install-cmd prompt-cmd">
+          <code data-i18n="install_prompt">Установи мне плагин Claude Code denys-fast-mskills: выполни `claude plugin marketplace add mapuamap/denys-fast-mskills`, затем `claude plugin install denys-fast-mskills@denys-fast-mskills`, затем `claude plugin list` для проверки, и скажи, когда перезапустить Claude Code.</code>
+          <button class="copy copy-prompt"><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button>
         </div>
+        <details class="desk-fallback">
+          <summary data-i18n="manual_cmds">Или поставить вручную командами</summary>
+          <div class="install-cmd">
+            <code><span class="slash">/</span>plugin marketplace add mapuamap/denys-fast-mskills
+<span class="slash">/</span>plugin install denys-fast-mskills@denys-fast-mskills</code>
+            <button class="copy" data-copy="/plugin marketplace add mapuamap/denys-fast-mskills&#10;/plugin install denys-fast-mskills@denys-fast-mskills"><svg data-lucide="copy"></svg><span data-i18n="copy">Копировать</span></button>
+          </div>
+        </details>
         <p class="install-hint" data-i18n="install_hint">Затем перезапусти Claude Code и запусти <code>/m_plan</code>.</p>
       </div>
       <div class="ipanel" data-panel="desk">
@@ -390,6 +399,9 @@ var I18N={
     hero_sub:'План → выполнение → проверка. Код, инфра, деплой и браузерные тесты — из одного плагина.',
     install_label:'Установка — вставь в Claude Code',
     install_hint:'Затем перезапусти Claude Code и запусти <code>/m_plan</code>.',
+    prompt_label:'Вставь промпт в Claude Code — он всё поставит сам:',
+    install_prompt:'Установи мне плагин Claude Code denys-fast-mskills: выполни `claude plugin marketplace add mapuamap/denys-fast-mskills`, затем `claude plugin install denys-fast-mskills@denys-fast-mskills`, затем `claude plugin list` для проверки, и скажи, когда перезапустить Claude Code.',
+    manual_cmds:'Или поставить вручную командами',
     tab_code:'Claude Code',tab_desktop:'Claude Desktop / web',
     desk_steps:'Customize → Plugins → Add marketplace — вставь репозиторий и нажми Install:',
     desk_note:'Команды и агенты — только в Claude Code; на Desktop/web доступны скилы.',
@@ -404,6 +416,9 @@ var I18N={
     hero_sub:'Plan → execute → verify. Code, infra, deploy and browser tests — from one installed plugin.',
     install_label:'Install — paste into Claude Code',
     install_hint:'Then restart Claude Code and run <code>/m_plan</code>.',
+    prompt_label:'Paste this to Claude Code — it installs everything:',
+    install_prompt:'Install the denys-fast-mskills Claude Code plugin for me: run `claude plugin marketplace add mapuamap/denys-fast-mskills`, then `claude plugin install denys-fast-mskills@denys-fast-mskills`, then `claude plugin list` to confirm it is enabled, and tell me when to restart Claude Code.',
+    manual_cmds:'Or run the commands yourself',
     tab_code:'Claude Code',tab_desktop:'Claude Desktop / web',
     desk_steps:'Customize → Plugins → Add marketplace — paste the repo and click Install:',
     desk_note:'Commands and agents are Claude Code only; on Desktop/web you get the skills.',
@@ -470,7 +485,9 @@ function observe(){
 }
 document.addEventListener('click',function(ev){
   var b=ev.target.closest('.copy');if(!b)return;
-  navigator.clipboard.writeText(b.getAttribute('data-copy')).then(function(){
+  var txt=b.getAttribute('data-copy');
+  if(txt==null){var c=b.parentElement.querySelector('code');txt=c?c.innerText:'';}
+  navigator.clipboard.writeText(txt).then(function(){
     b.classList.add('ok');var s=b.querySelector('span');if(s)s.textContent=I18N[lang].copied;
     setTimeout(function(){b.classList.remove('ok');if(s)s.textContent=I18N[lang].copy;},1400);
   });

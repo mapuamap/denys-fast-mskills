@@ -9,9 +9,13 @@ Everything here is provider-agnostic and self-contained: no hardcoded paths, no 
 Landing page with copy-paste install for both surfaces:
 **https://mapuamap.github.io/denys-fast-mskills/**
 
-### Claude Code — full plugin (skills + commands + agents)
+### Claude Code — paste one prompt, the agent installs it
 
-This repo is its own plugin marketplace:
+Paste this to Claude Code (terminal / IDE) and it does the rest:
+
+> Install the denys-fast-mskills Claude Code plugin for me: run `claude plugin marketplace add mapuamap/denys-fast-mskills`, then `claude plugin install denys-fast-mskills@denys-fast-mskills`, then `claude plugin list` to confirm, and tell me when to restart.
+
+Or run the commands yourself:
 
 ```
 /plugin marketplace add mapuamap/denys-fast-mskills
