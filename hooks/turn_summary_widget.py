@@ -32,11 +32,12 @@ REASON_CHAR_CAP = 9500  # hook output strings are capped at 10k
 LEDGER_REL = os.path.join(".m_verify", "pending.md")
 CODE_TOOLS = ("Edit", "Write", "MultiEdit", "NotebookEdit")
 
-# Branded widget renderer is hosted in this repo and served via jsDelivr; the hook
-# only emits a tiny renderMWidget(<metrics>) call so no tokens are spent regenerating
-# HTML. Bump this with the plugin release + git tag (jsDelivr serves @v<WIDGET_VER>);
-# keep in sync with the BASE/@v tag in docs/widget/m_widget.js.
-WIDGET_VER = "2.8.0"
+# Branded widget renderer is hosted in this repo and served via jsDelivr off the
+# main branch (docs/widget/m_widget.js); the hook only emits a tiny
+# renderMWidget(<metrics>) call so no tokens are spent regenerating HTML. Pinning
+# to @main (not a version tag) means widget-only visual changes are just push +
+# jsDelivr purge — no plugin reinstall needed (the hook URL never changes).
+WIDGET_URL = "https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@main/docs/widget/m_widget.js"
 
 PRICE_CACHE = os.path.join(os.path.expanduser("~"), ".cache", "claude-pricing.json")
 CACHE_MAX_AGE = 86400  # 1 day
@@ -342,11 +343,9 @@ def widget_snippet(data_json):
     """The exact (tiny) widget_code the assistant passes to show_widget. All the
     branded design/logo/animation lives in the jsDelivr-hosted m_widget.js, so this
     snippet stays small — no per-turn HTML regeneration, ~no tokens."""
-    url = ("https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@v"
-           + WIDGET_VER + "/docs/widget/m_widget.js")
     return (
         '<div id="mw"></div>\n'
-        '<script src="' + url + '"></script>\n'
+        '<script src="' + WIDGET_URL + '"></script>\n'
         "<script>try{renderMWidget(" + data_json
         + ",'mw')}catch(e){document.getElementById('mw').textContent='m_widget: '+(e.message||e)}</script>"
     )

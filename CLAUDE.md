@@ -35,9 +35,10 @@ A third, always-on verification surface that is **separate** from `m_plan`'s `09
 ### End-of-turn widget — branded, jsDelivr-hosted (near-zero tokens)
 The Stop hook does **not** make the assistant author widget HTML each turn (that cost tokens + drifted in style). Instead:
 - The branded renderer lives at `docs/widget/m_widget.js` — it pulls the real `denys.fast` wordmark (`docs/logo.css` + `docs/logo.js`, obsidian/dark theme) and builds the dark stats card with the wind-sweep animation + count-up numbers. All heavy design is here.
-- It's served from this repo via **jsDelivr**: `https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@v<WIDGET_VER>/docs/widget/m_widget.js`. jsDelivr caches a tagged release permanently → instant + no token cost.
+- It's served from this repo via **jsDelivr off `@main`**: `https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@main/docs/widget/m_widget.js` (`WIDGET_URL` in the hook; `BASE` in `m_widget.js`). We deliberately do **not** pin a version tag — rapid tag releases made jsDelivr's tag-list cache lag and 404 new tags.
 - Each turn the hook emits a *tiny* snippet (`<div id=mw>` + that `<script src>` + `renderMWidget(<metrics>)`); the assistant copies it verbatim into `show_widget`. ~650 chars, mostly the metrics JSON it already has.
-- **Release coupling (important):** `WIDGET_VER` in `hooks/turn_summary_widget.py` and the `@v` tag in `m_widget.js`'s `BASE` must match, and a matching **git tag `v<WIDGET_VER>` must be pushed** or jsDelivr 404s (the snippet then shows a small inline fallback). So: change widget → bump `WIDGET_VER` + `BASE` + `plugin.json` version together → commit → push → `git tag v<X> && git push --tags`.
+- **Widget-only changes (visual/animation) are cheap:** edit `docs/widget/m_widget.js` → commit + push → **purge jsDelivr**: `curl https://purge.jsdelivr.net/gh/mapuamap/denys-fast-mskills@main/docs/widget/m_widget.js`. No plugin version bump or reinstall needed — the hook's `@main` URL is stable. For guaranteed-fresh rendering, restart Claude (browser may cache the JS ≤12h).
+- **Hook-logic changes** (anything in `turn_summary_widget.py`) still need a normal plugin release: bump `plugin.json` + commit/push + the owner reinstalls/updates the plugin.
 - `docs/widget/index.html` is a local/Pages preview (set `window.MW_BASE` to override the asset base). Count-up numbers seed their final value in the DOM first, so they're never stuck at 0 if `requestAnimationFrame` is throttled.
 
 ## Conventions

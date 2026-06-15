@@ -19,7 +19,7 @@
   // Same-repo asset base. Bump the @vX.Y.Z tag together with the plugin release
   // so jsDelivr serves a stable, instantly-cached copy. Keep in sync with the
   // WIDGET_VER constant in hooks/turn_summary_widget.py.
-  var BASE = g.MW_BASE || "https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@v2.8.0/docs/";
+  var BASE = g.MW_BASE || "https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@main/docs/";
 
   var INK = "#14171F", ACCENT = "#2DD4BF", TEXT = "#F4F4F5",
       DIM = "rgba(244,244,245,.55)", FAINT = "rgba(244,244,245,.32)",
