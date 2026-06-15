@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>m_widget — preview</title>
+<style>
+  body{background:#0b0d12;margin:0;padding:40px 24px;display:flex;flex-direction:column;gap:28px;align-items:center;font-family:ui-monospace,monospace}
+  .hint{color:#6b7280;font-size:12px}
+  button{background:#14171F;color:#2DD4BF;border:0.5px solid rgba(45,212,191,.4);border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="hint">Local preview — assets loaded from ../ (this repo), not jsDelivr.</div>
+  <button onclick="redraw()">↻ re-render (replay animations)</button>
+  <div id="mw"></div>
+  <div id="mw2"></div>
+
+  <script>window.MW_BASE = "../";</script>
+  <script src="m_widget.js"></script>
+  <script>
+    var SAMPLE = {
+      project: "denys-fast-mskills", model: "claude-opus-4-8",
+      duration_human: "1m 19s", duration_seconds: 79,
+      tokens: { new: 5810, input: 22, output: 5788, cache_read: 1531732, cache_write: 282206, total: 1819748 },
+      cost_usd: 2.6745, tools_total: 9, tools_by_name: { Bash: 6, Write: 3 },
+      tool_failures: 0, subagents_launched: 0
+    };
+    var SAMPLE2 = {
+      project: "some-app", model: "claude-sonnet-4-6",
+      duration_human: "12s",
+      tokens: { new: 840, input: 11, output: 829, cache_read: 90211, cache_write: 4002, total: 95053 },
+      cost_usd: 0.0071, tools_total: 3, tools_by_name: { Read: 2, Edit: 1 },
+      tool_failures: 1, subagents_launched: 2
+    };
+    function redraw() {
+      document.getElementById("mw").innerHTML = "";
+      document.getElementById("mw2").innerHTML = "";
+      document.getElementById("mw").id = "mw"; // keep id
+      renderMWidget(SAMPLE, "mw");
+      renderMWidget(SAMPLE2, "mw2");
+    }
+    redraw();
+  </script>
+</body>
+</html>

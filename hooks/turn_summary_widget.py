@@ -32,6 +32,12 @@ REASON_CHAR_CAP = 9500  # hook output strings are capped at 10k
 LEDGER_REL = os.path.join(".m_verify", "pending.md")
 CODE_TOOLS = ("Edit", "Write", "MultiEdit", "NotebookEdit")
 
+# Branded widget renderer is hosted in this repo and served via jsDelivr; the hook
+# only emits a tiny renderMWidget(<metrics>) call so no tokens are spent regenerating
+# HTML. Bump this with the plugin release + git tag (jsDelivr serves @v<WIDGET_VER>);
+# keep in sync with the BASE/@v tag in docs/widget/m_widget.js.
+WIDGET_VER = "2.5.0"
+
 PRICE_CACHE = os.path.join(os.path.expanduser("~"), ".cache", "claude-pricing.json")
 CACHE_MAX_AGE = 86400  # 1 day
 
@@ -332,40 +338,43 @@ def ledger_block(ledger_path, today):
     )
 
 
+def widget_snippet(data_json):
+    """The exact (tiny) widget_code the assistant passes to show_widget. All the
+    branded design/logo/animation lives in the jsDelivr-hosted m_widget.js, so this
+    snippet stays small — no per-turn HTML regeneration, ~no tokens."""
+    url = ("https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@v"
+           + WIDGET_VER + "/docs/widget/m_widget.js")
+    return (
+        '<div id="mw"></div>\n'
+        '<script src="' + url + '"></script>\n'
+        "<script>try{renderMWidget(" + data_json
+        + ",'mw')}catch(e){document.getElementById('mw').textContent='m_widget: '+(e.message||e)}</script>"
+    )
+
+
 def build_reason(metrics, last_prompt, ledger_path=None, today=""):
     data = json.dumps(metrics, ensure_ascii=False)
     prompt = (last_prompt or "").replace("\n", " ").strip()[:MAX_PROMPT_CHARS]
+    snippet = widget_snippet(data)
     reason = (
-        "[end-of-turn summary hook] Сделай следующее строго в этом порядке:\n\n"
-        "1) Нарисуй ОДИН компактный виджет-СТАТИСТИКУ за прошлый ход своим инструментом "
-        "визуализации (show_widget / render_visualization / визуальный артефакт). В виджете "
-        "ТОЛЬКО статистика, мелким шрифтом, минимум места — БЕЗ блоков «Задача» и «Что дальше». "
-        "Используй ТОЛЬКО эти измеренные значения, ничего не выдумывай:\n"
-        f"METRICS_JSON = {data}\n"
-        "Макет: тёмная тема, плотно, шрифт читабельный (~14-15px для метрик, ~13px для разбивки; "
-        "без огромных чисел). Заголовок — project + модель. Одна-две инлайн-строки метрик: "
-        "ГЛАВНОЕ число токенов = tokens.new (НОВЫЕ токены этого хода = input+output, то что реально "
-        "сгенерировано — НЕ показывай tokens.total в заголовке, оно раздуто кэшем); Стоимость "
-        "(cost_usd, реальная за ход, включает кэш); Время (duration_human); Вызвано тулов "
-        "(tools_total); Неуспешных (tool_failures); Агентов (subagents_launched). ОТДЕЛЬНОЙ мелкой "
-        "строкой ниже покажи разбивку: ▲in (tokens.input) / ▼out (tokens.output), и через разделитель "
-        "помеченный «контекст/кэш» — ⤷cache-read (tokens.cache_read) / ⤶cache-write (tokens.cache_write) "
-        "(это перечитывание контекста чата, в заголовок НЕ выносить). По желанию — тонкая строка "
-        "разбивки tools_by_name. Всё компактно.\n\n"
+        "[end-of-turn summary hook] Сделай по порядку:\n\n"
+        "1) Вызови инструмент визуализации show_widget (render_visualization / визуальный "
+        "артефакт) РОВНО ОДИН раз: title=\"turn_stats\", а widget_code задай В ТОЧНОСТИ равным "
+        "следующему блоку — скопируй дословно, НИЧЕГО не меняй и не дописывай свой HTML/CSS "
+        "(весь брендовый дизайн, логотип и анимации уже внутри подключаемого скрипта):\n"
+        "```\n" + snippet + "\n```\n"
+        "Если инструмент визуализации недоступен — выведи компактную Markdown-таблицу из чисел "
+        "в renderMWidget(...) выше (tokens.new, cost_usd, время, тулы, ошибки, агенты) и иди дальше.\n\n"
         "2) ПОСЛЕ виджета, обычным форматированным ТЕКСТОМ (НЕ внутри виджета) напиши блок "
-        "«Что дальше» — заголовок и 1–3 коротких пункта: что ты сделал в этом ходу и какой "
-        "логичный следующий шаг.\n\n"
-        "3) В САМОМ КОНЦЕ, обычным форматированным текстом, напиши блок «Задача» — ОДНО "
-        "предложение: синтез/суть того, что я просил (НЕ дословно мой промпт). Источник для "
-        f"перефраза (не цитируй целиком): «{prompt}»"
+        "«Что дальше» — заголовок и 1–3 коротких пункта: что сделал в этом ходу и логичный "
+        "следующий шаг.\n\n"
+        "3) В САМОМ КОНЦЕ, обычным текстом, напиши блок «Задача» — ОДНО предложение: суть того, "
+        f"что я просил (НЕ дословно). Источник для перефраза (не цитируй целиком): «{prompt}»"
     )
     if ledger_path:
         reason += ledger_block(ledger_path, today)
-    reason += (
-        "\n\nВ ЧАТ больше ничего не выводи"
-        + (" (шаг 4 пишет ТОЛЬКО в файл, в чат — ничего)" if ledger_path else "")
-        + ". Если инструмент визуализации недоступен — выведи статистику компактной "
-        "Markdown-таблицей, затем те же текстовые блоки."
+    reason += "\n\nВ ЧАТ больше ничего не выводи" + (
+        " (шаг 4 пишет ТОЛЬКО в файл, в чат — ничего)." if ledger_path else "."
     )
     return reason[:REASON_CHAR_CAP]
 

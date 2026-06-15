@@ -11,3 +11,4 @@ __pycache__/
 .claude/state/
 .m_plan/
 .m_verify/
+.claude/launch.json

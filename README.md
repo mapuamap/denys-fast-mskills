@@ -70,7 +70,9 @@ Installed globally with the plugin. `m_plan` / `m_plan_implement` can be invoked
 
 ## End-of-turn summary widget + verification ledger
 
-A `Stop` hook (`hooks/turn_summary_widget.py`) renders a compact in-chat stats widget at the end of each substantial turn (new tokens, cost, time, tool calls, failures, sub-agents), followed by short "what's next" / "task" notes. Trivial turns get a one-line summary instead. It fails open — any error just produces no output, never trapping the session.
+A `Stop` hook (`hooks/turn_summary_widget.py`) renders a compact, branded in-chat stats widget at the end of each substantial turn (new tokens, cost, time, tool calls, failures, sub-agents), followed by short "what's next" / "task" notes. Trivial turns get a one-line summary instead. It fails open — any error just produces no output, never trapping the session.
+
+The widget design (the `denys.fast` dark/obsidian card, logo, and animations) lives in `docs/widget/m_widget.js` and is served via jsDelivr, so the hook only emits a tiny `renderMWidget(<metrics>)` call each turn — near-zero tokens, consistent look. Renders in Claude desktop/web.
 
 On turns that **changed code**, the same hook also silently appends candidate items to `.m_verify/pending.md` — the ledger that `m_verify` then curates. So features to verify accumulate automatically from your work, and `/m_verify` closes them out. The widget renders in Claude desktop/web (not mobile); set `CLAUDE_WIDGET_MIN_TOOLS` to tune the trivial-turn threshold.
 

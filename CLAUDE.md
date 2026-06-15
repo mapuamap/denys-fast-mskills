@@ -32,6 +32,14 @@ A third, always-on verification surface that is **separate** from `m_plan`'s `09
 - **Feed gate:** the hook only appends on turns where code changed (`CODE_TOOLS` = Edit/Write/MultiEdit/NotebookEdit present in `tools_by_name`). The append is a *silent* 4th instruction (file IO only, nothing in chat) so the widget contract (widget + "what's next" + "task", nothing else in chat) is preserved.
 - **Delegation:** `m_verify` (interactive, main context) delegates AI checks to `m_code-test-runner` and fixes to **`m_verify-repair`** (run in background so the user keeps flowing). Repair edits the working tree but **never commits** — that's the user's call.
 
+### End-of-turn widget — branded, jsDelivr-hosted (near-zero tokens)
+The Stop hook does **not** make the assistant author widget HTML each turn (that cost tokens + drifted in style). Instead:
+- The branded renderer lives at `docs/widget/m_widget.js` — it pulls the real `denys.fast` wordmark (`docs/logo.css` + `docs/logo.js`, obsidian/dark theme) and builds the dark stats card with the wind-sweep animation + count-up numbers. All heavy design is here.
+- It's served from this repo via **jsDelivr**: `https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@v<WIDGET_VER>/docs/widget/m_widget.js`. jsDelivr caches a tagged release permanently → instant + no token cost.
+- Each turn the hook emits a *tiny* snippet (`<div id=mw>` + that `<script src>` + `renderMWidget(<metrics>)`); the assistant copies it verbatim into `show_widget`. ~650 chars, mostly the metrics JSON it already has.
+- **Release coupling (important):** `WIDGET_VER` in `hooks/turn_summary_widget.py` and the `@v` tag in `m_widget.js`'s `BASE` must match, and a matching **git tag `v<WIDGET_VER>` must be pushed** or jsDelivr 404s (the snippet then shows a small inline fallback). So: change widget → bump `WIDGET_VER` + `BASE` + `plugin.json` version together → commit → push → `git tag v<X> && git push --tags`.
+- `docs/widget/index.html` is a local/Pages preview (set `window.MW_BASE` to override the asset base). Count-up numbers seed their final value in the DOM first, so they're never stuck at 0 if `requestAnimationFrame` is throttled.
+
 ## Conventions
 
 - **Language:** everything user-facing is **English** (READMEs, SKILL/agent bodies, landing page). (Originals were partly Russian; that was translated on first release — keep new content English.) **Deliberate exception:** the Stop-hook *render instructions* in `hooks/turn_summary_widget.py` (and the widget's «Что дальше»/«Задача» headers) are Russian — that's the owner's personal widget; keep new hook-instruction text consistent with that file. The `.m_verify` ledger *field names* stay English (parsing contract); entry titles/notes follow the working language.
