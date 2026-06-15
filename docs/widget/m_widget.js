@@ -19,7 +19,7 @@
   // Same-repo asset base. Bump the @vX.Y.Z tag together with the plugin release
   // so jsDelivr serves a stable, instantly-cached copy. Keep in sync with the
   // WIDGET_VER constant in hooks/turn_summary_widget.py.
-  var BASE = g.MW_BASE || "https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@v2.7.0/docs/";
+  var BASE = g.MW_BASE || "https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@v2.8.0/docs/";
 
   var INK = "#14171F", ACCENT = "#2DD4BF", TEXT = "#F4F4F5",
       DIM = "rgba(244,244,245,.55)", FAINT = "rgba(244,244,245,.32)",
@@ -41,22 +41,19 @@
     });
   }
 
-  // minimalist binary (0/1) field — each cell cross-fades 0<->1 (pure CSS,
-  // staggered timing per cell), built as an inline SVG. The "secondary mark"
-  // sitting after the arrow next to the denys.fast wordmark.
-  function buildBinary() {
-    var cols = 7, rows = 3, cw = 9, ch = 12, W = cols * cw + 4, H = rows * ch + 2, s = "";
-    for (var c = 0; c < cols; c++) {
-      for (var r = 0; r < rows; r++) {
-        var x = c * cw + 6, y = r * ch + 11;
-        var dur = (1.5 + ((c * 7 + r * 13) % 9) * 0.21).toFixed(2);
-        var del = (((c * 5 + r * 11) % 11) * 0.19).toFixed(2);
-        var st = ' style="animation-duration:' + dur + 's;animation-delay:' + del + 's"';
-        s += '<text x="' + x + '" y="' + y + '" text-anchor="middle" class="b0"' + st + '>0</text>';
-        s += '<text x="' + x + '" y="' + y + '" text-anchor="middle" class="b1"' + st + '>1</text>';
-      }
+  // minimalist binary (0/1) field spanning the FULL widget width — a single row
+  // of cells spread edge-to-edge, each cross-fading 0<->1 (pure CSS, staggered
+  // per cell). Sits behind the header (logo + meta), vertically centered.
+  function buildBinary(n) {
+    n = n || 46;
+    var s = "";
+    for (var i = 0; i < n; i++) {
+      var dur = (1.5 + ((i * 13) % 9) * 0.21).toFixed(2);
+      var del = (((i * 7) % 11) * 0.19).toFixed(2);
+      var st = ' style="animation-duration:' + dur + 's;animation-delay:' + del + 's"';
+      s += '<span class="bit"><i class="b0"' + st + '>0</i><i class="b1"' + st + '>1</i></span>';
     }
-    return '<svg class="mw-bits" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' + s + '</svg>';
+    return '<div class="mw-bits" aria-hidden="true">' + s + '</div>';
   }
 
   function injectStyle() {
@@ -69,11 +66,15 @@
       '.mw-card{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;width:100%;max-width:720px;box-sizing:border-box;' +
         'background:' + INK + ';border:0.5px solid ' + LINE + ';border-radius:14px;' +
         'padding:14px 20px 12px;color:' + TEXT + ';animation:mw-in .45s ease both;position:relative;overflow:hidden}' +
-      '.mw-head{display:flex;align-items:center;justify-content:space-between;gap:16px}' +
-      '.mw-brand{display:flex;align-items:center;gap:0;min-width:0}' +
+      '.mw-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px}' +
+      '.mw-brand{position:relative;z-index:1;display:flex;align-items:center;min-width:0}' +
+      '.mw-meta{position:relative;z-index:1}' +
       '.mw-head .df-logo{margin:0}' +
-      '.mw-bits{flex:none;display:block;position:relative;margin-left:-104px;margin-top:-34px}' +
-      '.mw-bits text{font-family:ui-monospace,monospace;font-size:9px;fill:' + ACCENT + '}' +
+      '.mw-bits{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);z-index:0;' +
+        'display:flex;justify-content:space-between;align-items:center;pointer-events:none}' +
+      '.mw-bits .bit{position:relative;width:7px;height:13px;flex:0 0 auto}' +
+      '.mw-bits .bit i{position:absolute;left:0;top:0;font-family:ui-monospace,monospace;font-size:9px;' +
+        'font-style:normal;color:' + ACCENT + ';opacity:0}' +
       '.mw-bits .b0{animation-name:mw-b0;animation-iteration-count:infinite;animation-timing-function:ease-in-out}' +
       '.mw-bits .b1{animation-name:mw-b1;animation-iteration-count:infinite;animation-timing-function:ease-in-out}' +
       '.mw-meta{text-align:right;line-height:1.35;padding-top:2px}' +
@@ -133,8 +134,8 @@
     root.className = "mw-card";
     root.setAttribute("data-theme", "obsidian");
     root.innerHTML =
-      '<div class="mw-head">' +
-        '<div class="mw-brand"><div class="mw-logo"></div>' + buildBinary() + '</div>' +
+      '<div class="mw-head">' + buildBinary() +
+        '<div class="mw-brand"><div class="mw-logo"></div></div>' +
         '<div class="mw-meta"><div class="mw-proj">' + esc(d.project || "") + '</div>' +
           '<div class="mw-model">' + esc(d.model || "") + '</div></div>' +
       '</div>' +
