@@ -27,6 +27,11 @@ MIN_TOOLS_FOR_WIDGET = int(os.environ.get("CLAUDE_WIDGET_MIN_TOOLS", "2"))
 MAX_PROMPT_CHARS = 600
 REASON_CHAR_CAP = 9500  # hook output strings are capped at 10k
 
+# m_verify ledger: code-change turns get a silent 4th instruction to upsert
+# features-awaiting-verification into <cwd>/.m_verify/pending.md (curated by /m_verify).
+LEDGER_REL = os.path.join(".m_verify", "pending.md")
+CODE_TOOLS = ("Edit", "Write", "MultiEdit", "NotebookEdit")
+
 PRICE_CACHE = os.path.join(os.path.expanduser("~"), ".cache", "claude-pricing.json")
 CACHE_MAX_AGE = 86400  # 1 day
 
@@ -293,11 +298,45 @@ def one_line_summary(project, tk, total, cost, dur):
     )
 
 
-def build_reason(metrics, last_prompt):
+def ledger_block(ledger_path, today):
+    """Silent 4th step: upsert features-awaiting-verification into the ledger.
+    Only appended on turns where code actually changed."""
+    p = ledger_path.replace("\\", "/")
+    return (
+        "\n\n4) ТИХИЙ шаг — ТОЛЬКО файловые операции, НИ строчки в чат: обнови ledger фич, "
+        f"ожидающих проверки, по пути «{p}». В этом ходу менялся код, значит могли появиться "
+        "фичи/поведение, которые юзеру (или скилу /m_verify) надо подтвердить. Для КАЖДОЙ реально "
+        "реализованной в этом ходу вещи, которую имеет смысл проверять, сделай upsert одной секции. "
+        "Канонический формат файла (Markdown; плоский список секций `## `; идентичность по полю "
+        "key; имена полей пиши РОВНО так, по-английски; заголовок/значения — на рабочем языке):\n"
+        "```\n"
+        "# m_verify ledger — features awaiting verification\n"
+        "<!-- schema:1 — appended by the m_verify Stop hook, curated by /m_verify. Flat list of "
+        "`## ` items keyed by `key:`. Do not hand-edit during a /m_verify run. -->\n"
+        "\n"
+        "## <короткий заголовок фичи>\n"
+        "- key: <stable-slug>\n"
+        "- status: pending\n"
+        "- who: unknown\n"
+        "- how: <конкретная проверка — команда / URL / ожидаемое поведение>\n"
+        "- files: <через запятую, что менялось>\n"
+        f"- added: {today}\n"
+        "- evidence:\n"
+        "- repair_task:\n"
+        "```\n"
+        "Правила: создай папку и файл, если их нет (с этим заголовком). Если секция с таким key уже "
+        "есть — НЕ дублируй (при необходимости обнови поля). Бери ТОЛЬКО реально сделанное в этом "
+        "ходу, ничего не выдумывай. who всегда unknown (триаж сделает /m_verify), status pending, "
+        "how — самая дешёвая надёжная проверка. Никаких секретов/токенов/прод-хостов в файле. Если в "
+        "этом ходу не появилось ничего проверяемого юзером — НИЧЕГО не пиши и файл не создавай."
+    )
+
+
+def build_reason(metrics, last_prompt, ledger_path=None, today=""):
     data = json.dumps(metrics, ensure_ascii=False)
     prompt = (last_prompt or "").replace("\n", " ").strip()[:MAX_PROMPT_CHARS]
     reason = (
-        "[end-of-turn summary hook] Сделай РОВНО три вещи строго в этом порядке:\n\n"
+        "[end-of-turn summary hook] Сделай следующее строго в этом порядке:\n\n"
         "1) Нарисуй ОДИН компактный виджет-СТАТИСТИКУ за прошлый ход своим инструментом "
         "визуализации (show_widget / render_visualization / визуальный артефакт). В виджете "
         "ТОЛЬКО статистика, мелким шрифтом, минимум места — БЕЗ блоков «Задача» и «Что дальше». "
@@ -318,9 +357,15 @@ def build_reason(metrics, last_prompt):
         "логичный следующий шаг.\n\n"
         "3) В САМОМ КОНЦЕ, обычным форматированным текстом, напиши блок «Задача» — ОДНО "
         "предложение: синтез/суть того, что я просил (НЕ дословно мой промпт). Источник для "
-        f"перефраза (не цитируй целиком): «{prompt}»\n\n"
-        "Больше ничего не пиши. Если инструмент визуализации недоступен — выведи статистику "
-        "компактной Markdown-таблицей, затем те же текстовые блоки."
+        f"перефраза (не цитируй целиком): «{prompt}»"
+    )
+    if ledger_path:
+        reason += ledger_block(ledger_path, today)
+    reason += (
+        "\n\nВ ЧАТ больше ничего не выводи"
+        + (" (шаг 4 пишет ТОЛЬКО в файл, в чат — ничего)" if ledger_path else "")
+        + ". Если инструмент визуализации недоступен — выведи статистику компактной "
+        "Markdown-таблицей, затем те же текстовые блоки."
     )
     return reason[:REASON_CHAR_CAP]
 
@@ -368,6 +413,11 @@ def main():
         }))
         return
 
+    # code-change turns also (silently) feed the m_verify ledger
+    code_changed = any(t in turn["tools_by_name"] for t in CODE_TOOLS)
+    ledger_path = os.path.join(cwd, LEDGER_REL) if (cwd and code_changed) else None
+    today = datetime.now().strftime("%Y-%m-%d")
+
     metrics = {
         "project": project,
         "model": turn["model"],
@@ -390,7 +440,7 @@ def main():
 
     print(json.dumps({
         "decision": "block",
-        "reason": build_reason(metrics, turn["last_prompt"]),
+        "reason": build_reason(metrics, turn["last_prompt"], ledger_path, today),
         "systemMessage": one_line_summary(project, tk, total, cost, dur_human),
         "suppressOutput": True,
     }))  # ensure_ascii=True -> pure-ASCII output, encoding-safe for any consumer

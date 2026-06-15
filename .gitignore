@@ -3,6 +3,11 @@
 Thumbs.db
 *.swp
 
+# Python bytecode (from running/testing hooks/scripts)
+__pycache__/
+*.pyc
+
 # Claude Code transient state (only relevant if this repo is itself used as a project)
 .claude/state/
 .m_plan/
+.m_verify/

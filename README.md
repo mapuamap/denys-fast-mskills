@@ -52,6 +52,7 @@ Installed globally with the plugin. `m_plan` / `m_plan_implement` can be invoked
 | **m_code_init_project** | Bootstrap / harden a project for AI-assisted development (CLAUDE.md, rules, seams, first tests). |
 | **m_code_refactor** | Safe refactoring / restructuring in small verified slices. Modes: `preserve` (behavior-preserving legacy work) or `may-change` (architecture improvement). |
 | **m_code_rules_audit** | Audit code against the project's own rules and checks (complements `/code-review`). |
+| **m_verify** | Feature-verification manager. Reads the `.m_verify/` ledger of features that shipped but aren't confirmed working, auto-runs every check AI can (build/test/lint + Playwright/browser), hands you a minimal human checklist, and spawns background repair agents for failures without blocking the chat. |
 
 ### Commands
 
@@ -65,7 +66,13 @@ Installed globally with the plugin. `m_plan` / `m_plan_implement` can be invoked
 
 ### Agents
 
-`m_code_architecture_reviewer`, `m_code_context_scout`, `m_code_test_runner` — read-only investigators used by the m_code skills.
+`m_code_architecture_reviewer`, `m_code_context_scout`, `m_code_test_runner` — read-only investigators used by the m_code / m_plan skills. `m_verify-repair` — a focused, isolated fixer that `m_verify` launches in the background to repair one failed feature (edits the working tree, never commits).
+
+## End-of-turn summary widget + verification ledger
+
+A `Stop` hook (`hooks/turn_summary_widget.py`) renders a compact in-chat stats widget at the end of each substantial turn (new tokens, cost, time, tool calls, failures, sub-agents), followed by short "what's next" / "task" notes. Trivial turns get a one-line summary instead. It fails open — any error just produces no output, never trapping the session.
+
+On turns that **changed code**, the same hook also silently appends candidate items to `.m_verify/pending.md` — the ledger that `m_verify` then curates. So features to verify accumulate automatically from your work, and `/m_verify` closes them out. The widget renders in Claude desktop/web (not mobile); set `CLAUDE_WIDGET_MIN_TOOLS` to tune the trivial-turn threshold.
 
 ## Two planning paths
 
@@ -90,9 +97,10 @@ The three `m_code_*` skills and three agents are global (they come with the plug
 ```
 denys-fast-mskills/
 ├── .claude-plugin/        plugin.json + marketplace.json
-├── skills/                6 skills (m_plan, m_plan_implement, m_plan_roll, 3x m_code)
+├── hooks/                 Stop hook: end-of-turn widget + .m_verify ledger feed
+├── skills/                7 skills (m_plan, m_plan_implement, m_plan_roll, 3x m_code, m_verify)
 ├── commands/              8 commands
-├── agents/                3 m_code agents
+├── agents/                4 agents (3x m_code + m_verify-repair)
 └── m_code_framework/      payload /m_setup installs into a target project
     ├── rules/  hooks/  scripts/
     ├── AI_INVARIANTS.md  settings.json  settings.strict.example.json

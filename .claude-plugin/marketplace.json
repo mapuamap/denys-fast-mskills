@@ -1,5 +1,6 @@
 {
   "name": "denys-fast-mskills",
+  "description": "Denis's m_* workflow toolkit for Claude Code: plan/execute/verify, deploy & infra context, Playwright full-test loop, the m_code code-quality framework, an end-of-turn summary widget, and the m_verify feature-verification manager.",
   "owner": {
     "name": "mapuamap",
     "url": "https://github.com/mapuamap"
@@ -8,7 +9,7 @@
     {
       "name": "denys-fast-mskills",
       "source": "./",
-      "description": "m_* toolkit: m_plan plan->execute->verify pipeline, deploy/infra context commands, Playwright full-test loop, and the m_code code-quality framework."
+      "description": "m_* toolkit: m_plan plan->execute->verify pipeline, deploy/infra context commands, Playwright full-test loop, the m_code code-quality framework, an end-of-turn summary widget, and m_verify feature-verification manager."
     }
   ]
 }
