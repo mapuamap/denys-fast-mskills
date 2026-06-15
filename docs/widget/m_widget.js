@@ -19,7 +19,7 @@
   // Same-repo asset base. Bump the @vX.Y.Z tag together with the plugin release
   // so jsDelivr serves a stable, instantly-cached copy. Keep in sync with the
   // WIDGET_VER constant in hooks/turn_summary_widget.py.
-  var BASE = g.MW_BASE || "https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@v2.6.0/docs/";
+  var BASE = g.MW_BASE || "https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@v2.7.0/docs/";
 
   var INK = "#14171F", ACCENT = "#2DD4BF", TEXT = "#F4F4F5",
       DIM = "rgba(244,244,245,.55)", FAINT = "rgba(244,244,245,.32)",
@@ -66,15 +66,13 @@
       '@keyframes mw-sweep{0%{background-position:-160% 0}100%{background-position:260% 0}}' +
       '@keyframes mw-b0{0%,46%{opacity:.78}54%,100%{opacity:0}}' +
       '@keyframes mw-b1{0%,46%{opacity:0}54%,100%{opacity:.78}}' +
-      '@keyframes mw-arrow{0%,100%{opacity:.4;transform:translateX(0)}50%{opacity:1;transform:translateX(2px)}}' +
       '.mw-card{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;width:100%;max-width:720px;box-sizing:border-box;' +
         'background:' + INK + ';border:0.5px solid ' + LINE + ';border-radius:14px;' +
         'padding:14px 20px 12px;color:' + TEXT + ';animation:mw-in .45s ease both;position:relative;overflow:hidden}' +
       '.mw-head{display:flex;align-items:center;justify-content:space-between;gap:16px}' +
-      '.mw-brand{display:flex;align-items:center;gap:13px;min-width:0}' +
+      '.mw-brand{display:flex;align-items:center;gap:0;min-width:0}' +
       '.mw-head .df-logo{margin:0}' +
-      '.mw-arrow{color:' + ACCENT + ';font-size:18px;line-height:1;flex:none;animation:mw-arrow 2.4s ease-in-out infinite}' +
-      '.mw-bits{flex:none;display:block}' +
+      '.mw-bits{flex:none;display:block;position:relative;margin-left:-104px;margin-top:-34px}' +
       '.mw-bits text{font-family:ui-monospace,monospace;font-size:9px;fill:' + ACCENT + '}' +
       '.mw-bits .b0{animation-name:mw-b0;animation-iteration-count:infinite;animation-timing-function:ease-in-out}' +
       '.mw-bits .b1{animation-name:mw-b1;animation-iteration-count:infinite;animation-timing-function:ease-in-out}' +
@@ -136,8 +134,7 @@
     root.setAttribute("data-theme", "obsidian");
     root.innerHTML =
       '<div class="mw-head">' +
-        '<div class="mw-brand"><div class="mw-logo"></div>' +
-          '<span class="mw-arrow">&#8594;</span>' + buildBinary() + '</div>' +
+        '<div class="mw-brand"><div class="mw-logo"></div>' + buildBinary() + '</div>' +
         '<div class="mw-meta"><div class="mw-proj">' + esc(d.project || "") + '</div>' +
           '<div class="mw-model">' + esc(d.model || "") + '</div></div>' +
       '</div>' +
