@@ -5,16 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>m_widget — preview</title>
 <style>
-  body{background:#0b0d12;margin:0;padding:40px 24px;display:flex;flex-direction:column;gap:28px;align-items:center;font-family:ui-monospace,monospace}
-  .hint{color:#6b7280;font-size:12px}
-  button{background:#14171F;color:#2DD4BF;border:0.5px solid rgba(45,212,191,.4);border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer}
+  body{background:#0b0d12;margin:0;padding:40px 24px;font-family:ui-monospace,monospace}
+  .hint{color:#6b7280;font-size:12px;margin-bottom:14px}
+  button{background:#14171F;color:#2DD4BF;border:0.5px solid rgba(45,212,191,.4);border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer;margin-bottom:24px}
+  /* simulate the real show_widget container (~680px, display:block, width:100%) */
+  .host{width:680px;margin:0 auto 28px;display:block}
 </style>
 </head>
 <body>
   <div class="hint">Local preview — assets loaded from ../ (this repo), not jsDelivr.</div>
   <button onclick="redraw()">↻ re-render (replay animations)</button>
-  <div id="mw"></div>
-  <div id="mw2"></div>
+  <div class="host"><div id="mw"></div></div>
+  <div class="host"><div id="mw2"></div></div>
 
   <script>window.MW_BASE = "../";</script>
   <script src="m_widget.js"></script>
@@ -34,9 +36,9 @@
       tool_failures: 1, subagents_launched: 2
     };
     function redraw() {
-      document.getElementById("mw").innerHTML = "";
-      document.getElementById("mw2").innerHTML = "";
-      document.getElementById("mw").id = "mw"; // keep id
+      var a = document.getElementById("mw"), b = document.getElementById("mw2");
+      a.innerHTML = ""; a.className = ""; a.removeAttribute("style");
+      b.innerHTML = ""; b.className = ""; b.removeAttribute("style");
       renderMWidget(SAMPLE, "mw");
       renderMWidget(SAMPLE2, "mw2");
     }

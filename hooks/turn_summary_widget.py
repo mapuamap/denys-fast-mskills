@@ -36,7 +36,7 @@ CODE_TOOLS = ("Edit", "Write", "MultiEdit", "NotebookEdit")
 # only emits a tiny renderMWidget(<metrics>) call so no tokens are spent regenerating
 # HTML. Bump this with the plugin release + git tag (jsDelivr serves @v<WIDGET_VER>);
 # keep in sync with the BASE/@v tag in docs/widget/m_widget.js.
-WIDGET_VER = "2.5.0"
+WIDGET_VER = "2.6.0"
 
 PRICE_CACHE = os.path.join(os.path.expanduser("~"), ".cache", "claude-pricing.json")
 CACHE_MAX_AGE = 86400  # 1 day
