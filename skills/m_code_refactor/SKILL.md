@@ -26,113 +26,39 @@ Use `$ARGUMENTS` as the target module / path / feature and the goal. If the user
 
 Do not apply Clean Architecture, DDD, repositories, services, or interfaces mechanically. Each abstraction has to earn its place (see step 7) — unjustified ceremony makes code *harder* to change, which is the opposite of the point.
 
+The detailed reference catalogs for steps 4–7 and the stop conditions live in `templates/playbook.md` — **read it once before you start a real refactor** (skip for a pure throwaway question). The output skeleton lives in `templates/report_format.md`.
+
 ## Workflow
 
 ### 1. Establish a baseline
 
-Before editing, pin down what "still works" means. For a large or unfamiliar area, delegate the wide scan to the `m_code-context-scout` agent so file dumps stay out of the main context; keep only its map.
-
-Capture:
-
-```txt
-- language / framework / package manager
-- test / typecheck / lint / build commands
-- applicable CLAUDE.md, .claude/rules, README, architecture docs, CI
-- the target's public surface: exports, routes, CLI, schemas, migrations, integrations
-```
-
-Run the existing checks when safe — delegate noisy runs to the `m_code-test-runner` agent and keep only the summary. Record pass/fail/skipped. A failing baseline is not your failure; hiding it is.
+Before editing, pin down what "still works" means. For a large or unfamiliar area, delegate the wide scan to the `m_code-context-scout` agent so file dumps stay out of the main context; keep only its map. Capture the language/tooling, the existing check commands, the governing docs, and the target's public surface (full checklist in `templates/playbook.md`). Run the existing checks when safe via `m_code-test-runner`; record pass/fail/skipped. A failing baseline is not your failure; hiding it is.
 
 ### 2. Define the behavior contract
 
-List the externally visible behavior that must hold (strict in `preserve`; in `may-change` it tells you exactly what you are intentionally changing):
-
-```txt
-public exports / APIs, request/response shapes
-CLI arguments and output
-DB schema and migrations
-auth / permissions, billing / payments
-error semantics, logging/observability others rely on
-external service contracts
-```
-
-If behavior is unclear, characterize it with tests *before* restructuring — you cannot preserve what you have not pinned down.
+List the externally visible behavior that must hold — strict in `preserve`; in `may-change` it tells you exactly what you are intentionally changing. See the contract checklist in `templates/playbook.md` (APIs, request/response shapes, CLI, schema/migrations, auth, billing, error semantics, external contracts). If behavior is unclear, characterize it with tests *before* restructuring.
 
 ### 3. Build the safety net
 
-Add tests in the order that buys the most confidence per line:
-
-```txt
-1. characterization tests around current behavior
-2. regression tests for known bugs
-3. unit tests for extracted pure logic
-4. narrow integration tests for adapters / persistence / serialization
-5. minimal E2E for critical user paths
-```
-
-Test observable behavior, not private internals just because they are easier to reach. Use fakes/mocks only at external or nondeterministic boundaries: DB, network, filesystem, clock, random/ID, queues, email/payment/SMS, feature flags.
+Add tests in the order that buys the most confidence per line (characterization → regression → unit → narrow integration → minimal E2E — see `templates/playbook.md`). Test observable behavior, not private internals; use fakes/mocks only at external or nondeterministic boundaries (DB, network, filesystem, clock, random/ID, queues, email/payment/SMS, feature flags).
 
 ### 4. Map the area and name the friction
 
-From the scout's map and your own targeted reads, identify concrete problems — evidence, not vibes:
-
-```txt
-- business decisions inside controllers / routes / UI / CLI handlers
-- core logic importing framework, DB, HTTP, filesystem, env, clock, random, or adapters
-- constructors that build hard dependencies internally
-- god modules; modules with several unrelated reasons to change
-- shared mutable global state; circular imports
-- duplicate business rules; broad utils/helpers/misc buckets
-- infrastructure exceptions leaking into domain logic
-- tests that need real external systems unnecessarily
-```
+From the scout's map and your own targeted reads, identify concrete problems — evidence, not vibes. Match against the friction catalog in `templates/playbook.md` (business logic in handlers, core logic importing infra, hard-built deps, god modules, global state, duplicate rules, leaking infra exceptions, tests needing real externals).
 
 ### 5. Pick the smallest useful target shape
 
-Only where it fits. For a small project, fewer files and clearer functions beat five new layers.
-
-```txt
-entrypoints/  thin framework/UI/CLI boundary
-application/  use cases, transactions, orchestration, permissions workflow
-domain/       pure rules, policies, entities, value objects
-ports/        interfaces/protocols for external systems
-adapters/     concrete DB/API/filesystem/framework implementations
-shared/       narrow primitives only
-```
-
-Dependency rule: `entrypoints -> application -> domain`; `application -> ports`; `adapters -> ports`; `domain` imports no framework / DB / network / env / clock / random / adapters.
+Only where it fits — for a small project, fewer files and clearer functions beat five new layers. Use the layer map + dependency rule in `templates/playbook.md` (`entrypoints -> application -> domain`; `application -> ports`; `adapters -> ports`; `domain` imports no infra) as a target, not a mandate.
 
 ### 6. Refactor one vertical slice
 
 Sequence: `characterize -> extract pure logic -> introduce seam/port -> add adapter -> move orchestration -> delete dead code -> validate`.
 
-Introduce the seam *before* moving code — a clock parameter, an injected ID generator, a small client interface, a repository port, a composition root for wiring. Use the least disruptive seam that creates a real test or dependency boundary.
-
-Inside the slice (strict in `preserve`):
-
-```txt
-- keep public API and output shapes stable
-- avoid schema, auth, permission, and payment changes
-- preserve error semantics unless the user is explicitly changing them
-- run the narrowest relevant check after each edit (delegate to m_code-test-runner)
-```
-
-A good slice fits in one reviewable diff and follows one behavior path, not a whole subsystem.
+Introduce the seam *before* moving code — a clock parameter, an injected ID generator, a small client interface, a repository port, a composition root for wiring. Use the least disruptive seam that creates a real test or dependency boundary. Keep the slice to one reviewable diff and one behavior path; the in-slice constraints (strict in `preserve`) are in `templates/playbook.md`.
 
 ### 7. Justify every abstraction
 
-Recommend an abstraction only if at least one is true:
-
-```txt
-- it isolates an external or nondeterministic dependency
-- it enables fast behavior tests
-- it enforces dependency direction
-- it protects a public compatibility boundary
-- it removes duplicate business rules
-- it makes a future change local instead of cross-cutting
-```
-
-Reject anything that only renames functions or adds a layer for symmetry. When in doubt, leave it concrete — you can extract later when a second caller actually appears.
+Recommend an abstraction only if it earns its place against the criteria in `templates/playbook.md` (isolates an external/nondeterministic dep, enables fast tests, enforces dependency direction, protects a public boundary, removes duplicate rules, or localizes a future change). Reject anything that only renames or adds a layer for symmetry — when in doubt, leave it concrete.
 
 ### 8. Verify and review
 
@@ -140,59 +66,14 @@ After the slice, run the relevant checks (via `m_code-test-runner`). For structu
 
 ### Stop conditions
 
-Stop and report instead of expanding scope when:
-
-```txt
-- characterization tests reveal unknown or contradictory behavior
-- a preserve refactor turns out to require a behavior change
-- baseline failures block validation
-- a migration / schema change becomes necessary
-- auth, permissions, billing, security, or data-deletion behavior would change
-- the safe slice has grown into a rewrite
-```
-
-These need explicit human review even if checks pass: auth/permissions, billing/payments, migrations/schema/retention, data deletion, security-sensitive parsing/validation, public API compatibility, deployment/runtime config, cross-service contracts.
+Stop and report instead of expanding scope when a stop condition in `templates/playbook.md` is hit (unknown/contradictory behavior surfaced, a `preserve` refactor needs a behavior change, baseline failures block validation, a migration/schema change becomes necessary, auth/billing/security/data-deletion would change, or the slice has grown into a rewrite). That file also lists the changes needing explicit human review even when checks pass.
 
 ## Final response format
 
-```txt
-Mode: preserve | may-change · Strategy: report-only | patch-small | patch-slice
-
-Baseline:
-- Tests / Typecheck / Lint / Build: pass/fail/skipped/not found
-
-Scope:
-- <files/modules>
-
-Behavior contract:
-- Must hold: <items>
-
-Safety net:
-- <tests added/updated>
-
-Findings:
-1. [severity] <issue>
-   Evidence: <path/import/call/test gap>
-   Impact: <why it hurts change/testability>
-   Fix: <specific change>
-
-Changes made or proposed:
-- <path>: <change>
-
-Validation:
-- <command>: pass/fail/skipped + reason
-
-Behavior preservation (preserve mode):
-- Public API changed: yes/no · Data model changed: yes/no · User-visible behavior changed: yes/no
-
-Migration plan / next slices:
-1. <next small step>
-2. <next small step>
-
-Remaining risk:
-- <specific risk>
-```
+Emit the report using the skeleton in `templates/report_format.md`.
 
 ## Files in this skill
-- `SKILL.md` — this file
+- `SKILL.md` — this file (core workflow)
+- `templates/playbook.md` — friction catalog, target shape, abstraction tests, stop conditions (read once before a real refactor)
+- `templates/report_format.md` — final response skeleton (read at report time)
 - `evals/evals.json` — test cases

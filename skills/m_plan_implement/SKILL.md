@@ -31,17 +31,7 @@ Follow-up to `m_plan`. Reads existing artifacts, drives them to completion. No r
 
 5. **Readiness check.** If `03_infra_requirements.md` exists, list its secrets/access requirements and ask `Ready? (yes / no — name the blocker)`. Open `[!]` blockers in `09` must be resolved or converted to `[~]` before proceeding.
 
-6. **Deployment reality gate.** Before editing code, decide whether this plan has an actual runtime surface.
-   - If the project is a deployed service/app/job: require a real environment target (VM, VPS, NAS, container host, CI/CD target, cloud app, Windows service, browser-served local app, etc.) and at least one remote or externally observable smoke check.
-   - **Deploy reality invariant:** local build / unit / dev-server checks on this workstation are *preflight only*. They never satisfy `V-DEPLOY-*`, `V-SMOKE-*`, or `V-E2E-*` rows unless `06` explicitly declares this workstation as the deployment target. The rules below all enforce this one invariant — they don't restate it.
-   - If the plan claims "no deploy needed", verify that from artifacts and project type. For a deployable runtime, convert that to a blocker/deviation and ask for or infer the real deploy path.
-   - If the target is production or a shared running service, apply the repo/user destructive-action policy before restarts, migrations, replacing containers, data changes, or reboots.
-
-7. **Browser verification preflight.** If `08_e2e_plan.md` has browser/UI checks (or the task changed a served UI), confirm you can actually run them before you start:
-   - A **browser MCP is available** — Playwright MCP or Chrome MCP (on macOS without one, computer-use). If none is available, say so and ask the user to enable one; never invent browser results.
-   - The **target URL is reachable** from here (VPN / allowlist in place).
-   - If the surface needs **login**, test credentials or a session are available (from the env / user, never hardcoded).
-   - If you're unsure whether browser verification is wanted, **ask**. If you can't access it (no MCP, unreachable, login without creds), **stop and ask, or mark the `V-E2E-*` rows `[!]` blocked** — never fake a pass or silently skip.
+6. **Deployment reality gate + browser preflight.** Before editing code, decide whether this plan has an actual runtime surface and a real deploy target, and whether you can run any browser/UI checks `08` requires. **Deploy reality invariant:** local build / unit / dev-server checks on this workstation are *preflight only* — they never satisfy `V-DEPLOY-*`, `V-SMOKE-*`, or `V-E2E-*` rows unless `06` declares this workstation as the target. If this plan deploys anything or has browser checks, **read `templates/deploy_rules.md` now** for the full gate + preflight checklist before proceeding.
 
 ## Phase B — Execute (default: direct walk)
 
@@ -60,14 +50,7 @@ Walk `05_step_plan.md` step by step:
 
 Format: `- Sxx / V-XXX-YY — plan said: <one quote>. Did: <…>. Why: <…>.`
 
-**Deploy walks `06` like steps walk `05`, but only against the real target.** Run `06`'s "Deploy order" entries in declared order, each followed by its matching smoke check from `06`'s table. Stop on first failure; flip the matching `V-DEPLOY-XX` to `[!]` with the failure line. If `06` says to run commands locally, first confirm that those commands actually publish/restart/update the real target; otherwise treat them as preflight, log a deviation, and use the discovered real deploy path or block.
-
-**Real-environment deploy rules** (each one enforces the deploy reality invariant above):
-- Deploy verification must observe the real running artifact: `docker ps`/`compose ps` on the host, `systemctl status`, container image/tag/digest, service logs after restart, real HTTP/TCP/API probes, browser check against the served URL, scheduled task status, or equivalent.
-- Prefer the estate/project deployment path already documented in repo docs, wiki, scripts, service files, compose files, CI config, or AGENTS/CLAUDE instructions.
-- If deploy requires SSH, use the declared host and verify on that host after the command completes. If deploy uses CI/CD, trigger/watch the real pipeline and verify the deployed endpoint.
-- For migrations or restarts on production/shared services, read current state first, preserve running state, and ask before destructive actions as required by local operating rules.
-- After deploy, run at least one smoke check from the user's perspective or from an external/LAN vantage point, not only inside the build directory.
+**Deploy walks `06` like steps walk `05`, but only against the real target.** When every non-deploy `V-*` is `[x]`/`[~]`, run `06`'s "Deploy order" entries in declared order, each followed by its matching smoke check. Stop on first failure; flip the matching `V-DEPLOY-XX` to `[!]`. **Read `templates/deploy_rules.md`** for the deploy walk + real-environment deploy rules (what counts as observing the running artifact, SSH/CI handling, destructive-action policy, post-deploy smoke) — they all enforce the deploy reality invariant.
 
 **Final V-* sweep (before declaring DONE).** After everything above, re-read `09_verification.md` from disk and, for every still-`[ ]` row, attempt a deterministic check from current repo / build state: greps, file existence, signature matches, last build/test output. Flip what passes to `[x]`. Anything that cannot be deterministically verified stays `[ ]` and becomes a "Not done" item in Phase C.
 
@@ -86,37 +69,7 @@ Format: `- Sxx / V-XXX-YY — plan said: <one quote>. Did: <…>. Why: <…>.`
 
 ## Phase C — Three-section report
 
-Re-read `09_verification.md` from disk. Emit (headers stay even if a section is empty):
-
-```
-# Implementation report — <slug>
-
-## ✅ Done as planned
-- <V-XXX-YY> — <one-liner with path:line where useful>
-
-## 🔀 Worked around or changed
-- <V-XXX-YY or planned item> — plan said: <quote>. Did: <…>. Why: <…>. Impact: <…>.
-
-## ❌ Not done
-- <V-XXX-YY> — reason: <blocked / skipped per user / failed: <err>>. Next step: <…>.
-
-## Status
-Total: <N>. Done: <…>. Skipped: <…>. Blocked: <…>. Open: <…>.
-Final: DONE | PARTIAL | BLOCKED
-
-## Commands run
-- <build cmd> → <exit, last 3 lines>
-- <test cmd> → <summary>
-- e2e: <ids run + outcome>
-
-## Files changed
-<grouped diff summary>
-
-## Next smallest step
-<one action>
-```
-
-If not DONE: name the smallest action that unblocks each open / blocked item.
+Re-read `09_verification.md` from disk, then emit the three-section report using the skeleton in `templates/report_format.md` (all headers mandatory, kept even if empty). If not DONE, name the smallest action that unblocks each open / blocked item.
 
 ## Rules
 - Never regenerates the plan. If `01–08` are wrong → stop, tell user to re-run `/m_plan` or edit manually.
@@ -125,4 +78,7 @@ If not DONE: name the smallest action that unblocks each open / blocked item.
 - Trust artifacts: blockers were resolved in `/m_plan` Phase 0. New blockers mid-flight escalate, never silently bypass.
 
 ## Files in this skill
-- `SKILL.md` — this file
+- `SKILL.md` — this file (core algorithm)
+- `templates/deploy_rules.md` — deploy reality gate + browser preflight + real-environment deploy rules (read on deploy)
+- `templates/report_format.md` — Phase C report skeleton (read at report time)
+- `evals/evals.json` — test cases
