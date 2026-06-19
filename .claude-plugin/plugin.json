@@ -1,6 +1,6 @@
 {
   "name": "denys-fast-mskills",
-  "version": "2.8.1",
+  "version": "2.8.2",
   "description": "Denis's m_* toolkit for Claude Code: plan -> execute -> verify (m_plan), deploy/infra context commands, Playwright full-test loop, the m_code code-quality framework (rules, hooks, agents, verification), a branded end-of-turn summary widget (Stop hook, jsDelivr-hosted renderer — near-zero tokens per turn), and m_verify — a feature-verification manager fed by the hook that auto-checks what AI can, hands the user a minimal human checklist, and spawns background repair agents.",
   "author": {
     "name": "Denis",

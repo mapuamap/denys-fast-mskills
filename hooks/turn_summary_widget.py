@@ -307,35 +307,24 @@ def one_line_summary(project, tk, total, cost, dur):
 
 def ledger_block(ledger_path, today):
     """Silent 4th step: upsert features-awaiting-verification into the ledger.
-    Only appended on turns where code actually changed."""
+    Only appended on turns where code actually changed.
+
+    Compact form: one-line-per-field template instead of a fenced schema dump,
+    to keep this block (re-sent every code-change turn) small in context. The
+    produced file format is unchanged — same header, same English field names,
+    same `schema:1` — so the contract with skills/m_verify/SKILL.md still holds."""
     p = ledger_path.replace("\\", "/")
     return (
-        "\n\n4) ТИХИЙ шаг — ТОЛЬКО файловые операции, НИ строчки в чат: обнови ledger фич, "
-        f"ожидающих проверки, по пути «{p}». В этом ходу менялся код, значит могли появиться "
-        "фичи/поведение, которые юзеру (или скилу /m_verify) надо подтвердить. Для КАЖДОЙ реально "
-        "реализованной в этом ходу вещи, которую имеет смысл проверять, сделай upsert одной секции. "
-        "Канонический формат файла (Markdown; плоский список секций `## `; идентичность по полю "
-        "key; имена полей пиши РОВНО так, по-английски; заголовок/значения — на рабочем языке):\n"
-        "```\n"
-        "# m_verify ledger — features awaiting verification\n"
-        "<!-- schema:1 — appended by the m_verify Stop hook, curated by /m_verify. Flat list of "
-        "`## ` items keyed by `key:`. Do not hand-edit during a /m_verify run. -->\n"
-        "\n"
-        "## <короткий заголовок фичи>\n"
-        "- key: <stable-slug>\n"
-        "- status: pending\n"
-        "- who: unknown\n"
-        "- how: <конкретная проверка — команда / URL / ожидаемое поведение>\n"
-        "- files: <через запятую, что менялось>\n"
-        f"- added: {today}\n"
-        "- evidence:\n"
-        "- repair_task:\n"
-        "```\n"
-        "Правила: создай папку и файл, если их нет (с этим заголовком). Если секция с таким key уже "
-        "есть — НЕ дублируй (при необходимости обнови поля). Бери ТОЛЬКО реально сделанное в этом "
-        "ходу, ничего не выдумывай. who всегда unknown (триаж сделает /m_verify), status pending, "
-        "how — самая дешёвая надёжная проверка. Никаких секретов/токенов/прод-хостов в файле. Если в "
-        "этом ходу не появилось ничего проверяемого юзером — НИЧЕГО не пиши и файл не создавай."
+        "\n\n4) ТИХИЙ шаг — ТОЛЬКО файл, НИ строчки в чат. В этом ходу менялся код → обнови ledger "
+        f"фич на проверку: «{p}». Для КАЖДОЙ реально сделанной проверяемой вещи — upsert одной "
+        "секции `## `; идентичность по полю key (не дублируй; при нужде обнови поля). Имена полей "
+        "пиши РОВНО так (англ.), значения — на рабочем языке:\n"
+        "`## <заголовок>` · `- key: <slug>` · `- status: pending` · `- who: unknown` · "
+        "`- how: <дешёвая надёжная проверка: команда/URL/поведение>` · `- files: <что менялось>` · "
+        f"`- added: {today}` · `- evidence:` · `- repair_task:`\n"
+        "Файл/папку создай, если их нет, с шапкой `# m_verify ledger — features awaiting "
+        "verification` и строкой `<!-- schema:1 -->`. Бери ТОЛЬКО сделанное в этом ходу, ничего не "
+        "выдумывай; никаких секретов/токенов/прод-хостов. Нечего проверять — НИЧЕГО не пиши."
     )
 
 
