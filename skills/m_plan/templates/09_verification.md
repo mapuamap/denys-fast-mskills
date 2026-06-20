@@ -11,6 +11,14 @@ Status legend: `[ ]` open · `[x]` done · `[!]` blocked (must list blocker) · 
 
 > **Only include sections below whose source file exists.** If `03_infra_requirements.md` was not written, omit the `## Infra` section. Same for `## Code`, `## Deploy`, `## E2E`, `## Test`.
 
+## Readiness — deploy & e2e go/no-go (from the Phase 0 probe; include when the task deploys or has `08`)
+> Filled by `/m_plan` Phase 0 step 3: a satisfied precondition is `[x]` with the probe output; an unmet one is `[!]` with the blocker. These are the blockers that otherwise only surface at deploy/e2e time — they must be cleared (or accepted) before DONE.
+- [ ] V-READY-01: Real deploy target identified — name host/container/CI/app
+- [ ] V-READY-02: Deploy target reachable from here — SSH host configured / CI trigger / registry (paste probe)
+- [ ] V-READY-03: Deploy + e2e-login secrets present in target env (presence, not values)
+- [ ] V-READY-04: Browser MCP available for e2e — Playwright / Chrome / computer-use (only if `08`)
+- [ ] V-READY-05: E2E target URL reachable from here — VPN/allowlist (paste probe; only if `08`)
+
 ## Architecture (from `01_architecture.md`)
 - [ ] V-ARCH-01: Dependency direction holds in diff — paste check output
 - [ ] V-ARCH-02: Seams from 01 present as ports + adapters in code

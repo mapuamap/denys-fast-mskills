@@ -2,6 +2,15 @@
 
 Draw from this list in Phase 0. Always select the questions that *actually* apply to the task. Skip the ones whose answer is obvious from the scan. Phrase each as a discrete `AskUserQuestion` option set.
 
+## Deploy & E2E readiness (go/no-go — MANDATORY when the task deploys or adds an observable surface)
+> These are the blockers that otherwise surface only at deploy/e2e time, after the code is already built. Phase 0 step 3 **probes** what it can (target reachability, browser tooling, secret presence) read-only and asks the rest as mandatory questions. Every unmet item becomes a `[!]` `V-READY-*` row in `09` before Phase 1. Do not assume any of these — confirm or block.
+- Is there a real deploy target (host / container / CI / cloud app), or none yet? Name it.
+- Can that target be reached from here — SSH host configured, CI trigger available, registry/login reachable?
+- Are all secrets the deploy AND the e2e login need already provisioned in the target env?
+- Is a browser MCP available here for e2e (Playwright / Chrome / computer-use), or must e2e be deferred?
+- Is the e2e target URL reachable from here (VPN / allowlist), and do its login creds exist?
+- If any answer is "no": accept it as a known `[!]` blocker (plan ships with it visible), or resolve it before planning continues?
+
 ## Scope & intent
 - What is the single sentence definition of "done" for this task?
 - What is explicitly out of scope?

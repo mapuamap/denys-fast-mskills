@@ -29,7 +29,7 @@ Follow-up to `m_plan`. Reads existing artifacts, drives them to completion. No r
 
 4. **Detect resume state.** Summarize: `Already done: <N>. Open: <M>. Blocked: <K>.` Ask `Resume / Restart / Stop`.
 
-5. **Readiness check.** If `03_infra_requirements.md` exists, list its secrets/access requirements and ask `Ready? (yes / no — name the blocker)`. Open `[!]` blockers in `09` must be resolved or converted to `[~]` before proceeding.
+5. **Readiness check.** If `03_infra_requirements.md` exists, list its secrets/access requirements and ask `Ready? (yes / no — name the blocker)`. Any open `[!]` in `09` — including the `V-READY-*` deploy/e2e go/no-go rows seeded by `/m_plan` Phase 0 — must be resolved (re-probe and flip to `[x]`) or explicitly converted to `[~]` before proceeding. Do not start the walk with an unresolved deploy/e2e readiness blocker.
 
 6. **Deployment reality gate + browser preflight.** Before editing code, decide whether this plan has an actual runtime surface and a real deploy target, and whether you can run any browser/UI checks `08` requires. **Deploy reality invariant:** local build / unit / dev-server checks on this workstation are *preflight only* — they never satisfy `V-DEPLOY-*`, `V-SMOKE-*`, or `V-E2E-*` rows unless `06` declares this workstation as the target. If this plan deploys anything or has browser checks, **read `templates/deploy_rules.md` now** for the full gate + preflight checklist before proceeding.
 
