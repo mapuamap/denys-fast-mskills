@@ -13,3 +13,4 @@ __pycache__/
 .m_verify/
 .claude/launch.json
 CLAUDE.md.pre-reorg.bak
+mptest/
