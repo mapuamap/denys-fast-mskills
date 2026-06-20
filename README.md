@@ -76,6 +76,10 @@ The widget design (the `denys.fast` dark/obsidian card, logo, and animations) li
 
 On turns that **changed code**, the same hook also silently appends candidate items to `.m_verify/pending.md` — the ledger that `m_verify` then curates. So features to verify accumulate automatically from your work, and `/m_verify` closes them out. The widget renders in Claude desktop/web (not mobile); set `CLAUDE_WIDGET_MIN_TOOLS` to tune the trivial-turn threshold.
 
+## m_plan autodrive — finishes the plan without `/goal`
+
+A second `Stop` hook (`hooks/plan_completion_driver.py`) makes `m_plan` / `m_plan_implement` runs **drive themselves to completion**. When a run starts it arms a small `.m_plan/<slug>/.run.json` state file; while armed, the hook blocks the session from stopping as long as `09_verification.md` still has open `[ ]` checks, feeding the agent a focused "run the next cited check and tick the box" instruction each turn — the deterministic equivalent of manually running `/goal`. It stops on its own when the checklist is clean, when a turn/no-progress cap is hit, or the moment you interrupt and type something. Genuine `[!]` blockers don't keep it looping. With no armed run file the hook is silent, so it never affects ordinary sessions.
+
 ## Two planning paths
 
 There are intentionally two deploy/verify styles; pick per task:

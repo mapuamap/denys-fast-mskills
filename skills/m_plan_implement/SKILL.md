@@ -35,6 +35,12 @@ Follow-up to `m_plan`. Reads existing artifacts, drives them to completion. No r
 
 ## Phase B — Execute (default: direct walk)
 
+**Arm autodrive (default-on).** Before the first step, write the run-state file `.m_plan/<slug>/.run.json` so the `plan_completion_driver` Stop hook keeps the run going until `09_verification.md` has zero open `[ ]` rows — this is the deterministic replacement for manually running `/goal`:
+```json
+{"slug": "<slug>", "mode": "autodrive", "max_turns": <N_steps*4 + 20>, "turns_used": 0, "last_open_count": null, "no_progress_streak": 0, "verification_file": "09_verification.md", "human_prompts_at_arm": null}
+```
+While armed, the hook blocks stopping on any open `[ ]`, caps itself (turn limit + no-progress streak), and disarms automatically when the plan is done, a cap is hit, or the user interrupts and types anything. `[!]` blockers and `[~]` skips do **not** block stopping — only true `[ ]` do. **You must delete `.run.json` yourself when Phase C emits its report** (and if the user says stop/abort) — see Phase C. Do not arm if the user explicitly asked for a single step / dry run.
+
 Walk `05_step_plan.md` step by step:
 - Respect dependency order. After each step's per-step check passes, flip its `V-STEP-Sxx` to `[x]` via `Edit`.
 - On failing check: diagnose, retry **once**. Second failure → `[!]` blocker, stop, jump to Phase C.
@@ -68,6 +74,8 @@ Format: `- Sxx / V-XXX-YY — plan said: <one quote>. Did: <…>. Why: <…>.`
 - Deploy from `06` or the discovered real deploy path runs automatically after every non-deploy `V-*` is `[x]`/`[~]`. If no real deploy path can be identified for a deployable runtime, stop with `V-DEPLOY-*` blocked instead of reporting DONE.
 
 ## Phase C — Three-section report
+
+**Disarm autodrive first.** Delete `.m_plan/<slug>/.run.json` (if present) before writing the report, so the driver hook stops at this stop. (The hook also self-disarms when `09` is clean or a cap is hit; deleting here covers the report-on-partial/blocked case.)
 
 Re-read `09_verification.md` from disk, then emit the three-section report using the skeleton in `templates/report_format.md` (all headers mandatory, kept even if empty). If not DONE, name the smallest action that unblocks each open / blocked item.
 
