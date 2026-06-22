@@ -1,43 +1,38 @@
 #!/usr/bin/env python3
 """
-End-of-turn summary WIDGET hook (Stop).
+End-of-turn summary hook (Stop).
 
-Upgrade of ~/bin/claude-stop-hook.py: instead of only printing a plain-text
-ANSI systemMessage, on real-work turns it asks the assistant to render a rich
-in-chat widget (via the visualization / show_widget tool) using the
-decision:block -> one-more-turn mechanism.
+The branded in-chat widget (logo + stats card) has been REMOVED at the owner's
+request. What remains:
+  * a lightweight one-line ANSI systemMessage with the turn's token/cost stats
+    (shown on every non-empty turn);
+  * the silent .m_verify ledger feed on code-change turns (file IO only, never
+    a single line in chat) -- this is the one case that still uses the
+    decision:block -> one-more-turn mechanism.
 
 Flow per turn:
   1. Turn ends -> this Stop hook fires (stop_hook_active = false).
-  2. We parse the transcript for THIS turn's metrics (tokens, cost, time,
-     tool calls, tool failures, sub-agents launched, last prompt).
-  3. If the turn was trivial (few tools) -> emit a one-line systemMessage only.
-     If it was real work -> emit {"decision":"block","reason": <render instructions + metrics>}.
-  4. The assistant takes one more turn and renders the widget, then stops.
+  2. We parse the transcript for THIS turn's metrics (tokens, cost, time).
+  3. Code changed this turn -> emit {"decision":"block","reason": <silent ledger
+     instruction>} + the one-line systemMessage. Otherwise just the one-liner.
+  4. (code-change turn) the assistant takes one more turn, upserts the ledger
+     file silently, then stops.
   5. Stop fires again with stop_hook_active = true -> we exit silently. No loop.
 
 FAIL-OPEN: any error -> exit 0 with no output, so a bug here can never trap
 the session in a block loop.
 """
-import sys, json, os, time, glob as globmod
+import sys, json, os, time
 from datetime import datetime
 
 # --- tunables (env-overridable) ---------------------------------------------
 MIN_TOOLS_FOR_WIDGET = int(os.environ.get("CLAUDE_WIDGET_MIN_TOOLS", "2"))
-MAX_PROMPT_CHARS = 600
 REASON_CHAR_CAP = 9500  # hook output strings are capped at 10k
 
-# m_verify ledger: code-change turns get a silent 4th instruction to upsert
+# m_verify ledger: code-change turns get a silent instruction to upsert
 # features-awaiting-verification into <cwd>/.m_verify/pending.md (curated by /m_verify).
 LEDGER_REL = os.path.join(".m_verify", "pending.md")
 CODE_TOOLS = ("Edit", "Write", "MultiEdit", "NotebookEdit")
-
-# Branded widget renderer is hosted in this repo and served via jsDelivr off the
-# main branch (docs/widget/m_widget.js); the hook only emits a tiny
-# renderMWidget(<metrics>) call so no tokens are spent regenerating HTML. Pinning
-# to @main (not a version tag) means widget-only visual changes are just push +
-# jsDelivr purge — no plugin reinstall needed (the hook URL never changes).
-WIDGET_URL = "https://cdn.jsdelivr.net/gh/mapuamap/denys-fast-mskills@main/docs/widget/m_widget.js"
 
 PRICE_CACHE = os.path.join(os.path.expanduser("~"), ".cache", "claude-pricing.json")
 CACHE_MAX_AGE = 86400  # 1 day
@@ -180,39 +175,6 @@ def human_prompt_text(obj):
     return ""
 
 
-def sum_subagent_tokens(transcript_path):
-    """Session-cumulative sub-agent token totals + count of non-empty agents."""
-    totals = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}
-    count = 0
-    if not transcript_path:
-        return totals, count
-    session_id = os.path.splitext(os.path.basename(transcript_path))[0]
-    sub_dir = os.path.join(os.path.dirname(transcript_path), session_id, "subagents")
-    if not os.path.isdir(sub_dir):
-        return totals, count
-    for f in globmod.glob(os.path.join(sub_dir, "agent-*.jsonl")):
-        a = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}
-        try:
-            for line in open(f, "r", encoding="utf-8"):
-                try:
-                    o = json.loads(line)
-                except Exception:
-                    continue
-                if o.get("type") == "assistant":
-                    u = (o.get("message") or {}).get("usage") or {}
-                    a["input"] += u.get("input_tokens", 0) or 0
-                    a["output"] += u.get("output_tokens", 0) or 0
-                    a["cache_read"] += u.get("cache_read_input_tokens", 0) or 0
-                    a["cache_write"] += u.get("cache_creation_input_tokens", 0) or 0
-        except Exception:
-            continue
-        if sum(a.values()) > 0:
-            count += 1
-            for k in totals:
-                totals[k] += a[k]
-    return totals, count
-
-
 def parse_turn(transcript_path):
     """Aggregate metrics for the LAST human turn -> EOF."""
     tokens = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}
@@ -305,17 +267,19 @@ def one_line_summary(project, tk, total, cost, dur):
     )
 
 
-def ledger_block(ledger_path, today):
-    """Silent 4th step: upsert features-awaiting-verification into the ledger.
-    Only appended on turns where code actually changed.
+def build_ledger_reason(ledger_path, today):
+    """Silent step: upsert features-awaiting-verification into the ledger. Only
+    used on turns where code actually changed. File IO only — NOTHING in chat
+    (this preserves the no-widget, no-chatter contract).
 
     Compact form: one-line-per-field template instead of a fenced schema dump,
-    to keep this block (re-sent every code-change turn) small in context. The
+    to keep this reason (re-sent every code-change turn) small in context. The
     produced file format is unchanged — same header, same English field names,
     same `schema:1` — so the contract with skills/m_verify/SKILL.md still holds."""
     p = ledger_path.replace("\\", "/")
-    return (
-        "\n\n4) ТИХИЙ шаг — ТОЛЬКО файл, НИ строчки в чат. В этом ходу менялся код → обнови ledger "
+    reason = (
+        "[end-of-turn ledger hook] ТИХИЙ шаг — ТОЛЬКО файл, НИ строчки в чат, "
+        "НИКАКИХ виджетов. В этом ходу менялся код → обнови ledger "
         f"фич на проверку: «{p}». Для КАЖДОЙ реально сделанной проверяемой вещи — upsert одной "
         "секции `## `; идентичность по полю key (не дублируй; при нужде обнови поля). Имена полей "
         "пиши РОВНО так (англ.), значения — на рабочем языке:\n"
@@ -324,45 +288,8 @@ def ledger_block(ledger_path, today):
         f"`- added: {today}` · `- evidence:` · `- repair_task:`\n"
         "Файл/папку создай, если их нет, с шапкой `# m_verify ledger — features awaiting "
         "verification` и строкой `<!-- schema:1 -->`. Бери ТОЛЬКО сделанное в этом ходу, ничего не "
-        "выдумывай; никаких секретов/токенов/прод-хостов. Нечего проверять — НИЧЕГО не пиши."
-    )
-
-
-def widget_snippet(data_json):
-    """The exact (tiny) widget_code the assistant passes to show_widget. All the
-    branded design/logo/animation lives in the jsDelivr-hosted m_widget.js, so this
-    snippet stays small — no per-turn HTML regeneration, ~no tokens."""
-    return (
-        '<div id="mw"></div>\n'
-        '<script src="' + WIDGET_URL + '"></script>\n'
-        "<script>try{renderMWidget(" + data_json
-        + ",'mw')}catch(e){document.getElementById('mw').textContent='m_widget: '+(e.message||e)}</script>"
-    )
-
-
-def build_reason(metrics, last_prompt, ledger_path=None, today=""):
-    data = json.dumps(metrics, ensure_ascii=False)
-    prompt = (last_prompt or "").replace("\n", " ").strip()[:MAX_PROMPT_CHARS]
-    snippet = widget_snippet(data)
-    reason = (
-        "[end-of-turn summary hook] Сделай по порядку:\n\n"
-        "1) Вызови инструмент визуализации show_widget (render_visualization / визуальный "
-        "артефакт) РОВНО ОДИН раз: title=\"turn_stats\", а widget_code задай В ТОЧНОСТИ равным "
-        "следующему блоку — скопируй дословно, НИЧЕГО не меняй и не дописывай свой HTML/CSS "
-        "(весь брендовый дизайн, логотип и анимации уже внутри подключаемого скрипта):\n"
-        "```\n" + snippet + "\n```\n"
-        "Если инструмент визуализации недоступен — выведи компактную Markdown-таблицу из чисел "
-        "в renderMWidget(...) выше (tokens.new, cost_usd, время, тулы, ошибки, агенты) и иди дальше.\n\n"
-        "2) ПОСЛЕ виджета, обычным форматированным ТЕКСТОМ (НЕ внутри виджета) напиши блок "
-        "«Что дальше» — заголовок и 1–3 коротких пункта: что сделал в этом ходу и логичный "
-        "следующий шаг.\n\n"
-        "3) В САМОМ КОНЦЕ, обычным текстом, напиши блок «Задача» — ОДНО предложение: суть того, "
-        f"что я просил (НЕ дословно). Источник для перефраза (не цитируй целиком): «{prompt}»"
-    )
-    if ledger_path:
-        reason += ledger_block(ledger_path, today)
-    reason += "\n\nВ ЧАТ больше ничего не выводи" + (
-        " (шаг 4 пишет ТОЛЬКО в файл, в чат — ничего)." if ledger_path else "."
+        "выдумывай; никаких секретов/токенов/прод-хостов. Нечего проверять — НИЧЕГО не пиши. "
+        "В ЧАТ больше ничего не выводи (этот шаг пишет ТОЛЬКО в файл)."
     )
     return reason[:REASON_CHAR_CAP]
 
@@ -393,52 +320,28 @@ def main():
     total = sum(tk.values())
     prices = get_prices()
     cost = calc_cost(tk, prices)
-
-    # sub-agents launched this turn (Task calls); fall back to non-empty agent files
-    sub_tokens, sub_files = sum_subagent_tokens(transcript_path)
-    subagents = turn["tasks"] if turn["tasks"] else sub_files
-
     dur_human = fmt_duration(turn["duration_seconds"])
+    one_liner = one_line_summary(project, tk, total, cost, dur_human)
 
+    # Widget removed: the ONLY reason to take one more turn is the silent
+    # m_verify ledger feed on real-work turns where code changed. Every other
+    # turn just gets the lightweight one-line stats systemMessage, no block.
     real_work = turn["tools_total"] >= MIN_TOOLS_FOR_WIDGET
+    code_changed = any(t in turn["tools_by_name"] for t in CODE_TOOLS)
 
-    if not real_work:
-        # trivial turn: keep the lightweight one-liner, no widget
+    if real_work and code_changed and cwd:
+        ledger_path = os.path.join(cwd, LEDGER_REL)
+        today = datetime.now().strftime("%Y-%m-%d")
         print(json.dumps({
-            "systemMessage": one_line_summary(project, tk, total, cost, dur_human),
+            "decision": "block",
+            "reason": build_ledger_reason(ledger_path, today),
+            "systemMessage": one_liner,
             "suppressOutput": True,
         }))
         return
 
-    # code-change turns also (silently) feed the m_verify ledger
-    code_changed = any(t in turn["tools_by_name"] for t in CODE_TOOLS)
-    ledger_path = os.path.join(cwd, LEDGER_REL) if (cwd and code_changed) else None
-    today = datetime.now().strftime("%Y-%m-%d")
-
-    metrics = {
-        "project": project,
-        "model": turn["model"],
-        "duration_human": dur_human,
-        "duration_seconds": round(turn["duration_seconds"]) if turn["duration_seconds"] else None,
-        "tokens": {
-            "new": tk["input"] + tk["output"],  # реально сгенерировано/добавлено за ход
-            "input": tk["input"], "output": tk["output"],
-            "cache_read": tk["cache_read"], "cache_write": tk["cache_write"],
-            "total": total,
-        },
-        "cost_usd": round(cost, 4),
-        "pricing_model": prices.get("model", "fallback"),
-        "tools_total": turn["tools_total"],
-        "tools_by_name": turn["tools_by_name"],
-        "tool_results": turn["tool_results"],
-        "tool_failures": turn["tool_failures"],
-        "subagents_launched": subagents,
-    }
-
     print(json.dumps({
-        "decision": "block",
-        "reason": build_reason(metrics, turn["last_prompt"], ledger_path, today),
-        "systemMessage": one_line_summary(project, tk, total, cost, dur_human),
+        "systemMessage": one_liner,
         "suppressOutput": True,
     }))  # ensure_ascii=True -> pure-ASCII output, encoding-safe for any consumer
 

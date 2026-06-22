@@ -68,13 +68,13 @@ Installed globally with the plugin. `m_plan` / `m_plan_implement` can be invoked
 
 `m_code_architecture_reviewer`, `m_code_context_scout`, `m_code_test_runner` — read-only investigators used by the m_code / m_plan skills. `m_verify-repair` — a focused, isolated fixer that `m_verify` launches in the background to repair one failed feature (edits the working tree, never commits).
 
-## End-of-turn summary widget + verification ledger
+## End-of-turn summary line + verification ledger
 
-A `Stop` hook (`hooks/turn_summary_widget.py`) renders a compact, branded in-chat stats widget at the end of each substantial turn (new tokens, cost, time, tool calls, failures, sub-agents), followed by short "what's next" / "task" notes. Trivial turns get a one-line summary instead. It fails open — any error just produces no output, never trapping the session.
+A `Stop` hook (`hooks/turn_summary_widget.py`) prints a compact one-line stats summary at the end of each turn (new tokens, cost, time). It fails open — any error just produces no output, never trapping the session.
 
-The widget design (the `denys.fast` dark/obsidian card, logo, and animations) lives in `docs/widget/m_widget.js` and is served via jsDelivr, so the hook only emits a tiny `renderMWidget(<metrics>)` call each turn — near-zero tokens, consistent look. Renders in Claude desktop/web.
+> The branded in-chat stats widget (logo card + "what's next"/"task" notes) was removed in v2.11.0. The hook now only emits the lightweight one-line summary plus the silent ledger feed below.
 
-On turns that **changed code**, the same hook also silently appends candidate items to `.m_verify/pending.md` — the ledger that `m_verify` then curates. So features to verify accumulate automatically from your work, and `/m_verify` closes them out. The widget renders in Claude desktop/web (not mobile); set `CLAUDE_WIDGET_MIN_TOOLS` to tune the trivial-turn threshold.
+On turns that **changed code**, the same hook also silently appends candidate items to `.m_verify/pending.md` — the ledger that `m_verify` then curates. So features to verify accumulate automatically from your work, and `/m_verify` closes them out.
 
 ## m_plan autodrive — finishes the plan without `/goal`
 
@@ -103,7 +103,7 @@ The three `m_code_*` skills and three agents are global (they come with the plug
 ```
 denys-fast-mskills/
 ├── .claude-plugin/        plugin.json + marketplace.json
-├── hooks/                 Stop hook: end-of-turn widget + .m_verify ledger feed
+├── hooks/                 Stop hooks: m_plan autodrive + end-of-turn stats line & .m_verify ledger feed
 ├── skills/                7 skills (m_plan, m_plan_implement, m_plan_roll, 3x m_code, m_verify)
 ├── commands/              8 commands
 ├── agents/                4 agents (3x m_code + m_verify-repair)
