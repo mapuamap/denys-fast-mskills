@@ -68,11 +68,11 @@ Installed globally with the plugin. `m_plan` / `m_plan_implement` can be invoked
 
 `m_code_architecture_reviewer`, `m_code_context_scout`, `m_code_test_runner` — read-only investigators used by the m_code / m_plan skills. `m_verify-repair` — a focused, isolated fixer that `m_verify` launches in the background to repair one failed feature (edits the working tree, never commits).
 
-## End-of-turn summary line + verification ledger
+## End-of-turn summary + verification ledger
 
-A `Stop` hook (`hooks/turn_summary_widget.py`) prints a compact one-line stats summary at the end of each turn (new tokens, cost, time). It fails open — any error just produces no output, never trapping the session.
+A `Stop` hook (`hooks/turn_summary_widget.py`) prints a compact one-line stats summary at the end of each turn (new tokens, cost, time), and on substantial turns asks the assistant to add two short plain-text blocks: **"what's next"** (what was done + the logical next step) and **"task"** (a one-sentence restatement of your request). It fails open — any error just produces no output, never trapping the session.
 
-> The branded in-chat stats widget (logo card + "what's next"/"task" notes) was removed in v2.11.0. The hook now only emits the lightweight one-line summary plus the silent ledger feed below.
+> The branded in-chat stats **widget** (the denys.fast logo card) was removed in v2.11.0. The plain-text "what's next" / "task" summary it used to sit above is kept (restored in v2.13.0 after being dropped alongside the widget).
 
 On turns that **changed code**, the same hook also silently appends candidate items to `.m_verify/pending.md` — the ledger that `m_verify` then curates. So features to verify accumulate automatically from your work, and `/m_verify` closes them out.
 
