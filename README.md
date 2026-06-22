@@ -76,9 +76,9 @@ A `Stop` hook (`hooks/turn_summary_widget.py`) prints a compact one-line stats s
 
 On turns that **changed code**, the same hook also silently appends candidate items to `.m_verify/pending.md` — the ledger that `m_verify` then curates. So features to verify accumulate automatically from your work, and `/m_verify` closes them out.
 
-## m_plan autodrive — finishes the plan without `/goal`
+## m_plan completion — `09_verification.md` is the oracle
 
-A second `Stop` hook (`hooks/plan_completion_driver.py`) makes `m_plan` / `m_plan_implement` runs **drive themselves to completion**. When a run starts it arms a small `.m_plan/<slug>/.run.json` state file; while armed, the hook blocks the session from stopping as long as `09_verification.md` still has open `[ ]` checks, feeding the agent a focused "run the next cited check and tick the box" instruction each turn — the deterministic equivalent of manually running `/goal`. It stops on its own when the checklist is clean, when a turn/no-progress cap is hit, or the moment you interrupt and type something. Genuine `[!]` blockers don't keep it looping. With no armed run file the hook is silent, so it never affects ordinary sessions.
+`m_plan` / `m_plan_implement` walk the plan step by step and decide "done" from `09_verification.md` (zero open `[ ]` rows), not from the agent's judgement. For a long run that should keep going on its own, use the opt-in `/goal` mode (the skills emit the `/goal` line on request). *(The automatic completion-driver Stop hook was removed in v2.12.0.)*
 
 ## Two planning paths
 
@@ -103,7 +103,7 @@ The three `m_code_*` skills and three agents are global (they come with the plug
 ```
 denys-fast-mskills/
 ├── .claude-plugin/        plugin.json + marketplace.json
-├── hooks/                 Stop hooks: m_plan autodrive + end-of-turn stats line & .m_verify ledger feed
+├── hooks/                 Stop hook: end-of-turn stats line & .m_verify ledger feed
 ├── skills/                7 skills (m_plan, m_plan_implement, m_plan_roll, 3x m_code, m_verify)
 ├── commands/              8 commands
 ├── agents/                4 agents (3x m_code + m_verify-repair)

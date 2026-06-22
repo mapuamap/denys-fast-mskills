@@ -60,7 +60,7 @@ After writing, list paths + one-line summary each. **If any `V-READY-*` is `[!]`
 
 ## Phase 2 — Execute (default: direct walk; `/goal` opt-in)
 
-**Execution semantics are identical to `m_plan_implement` Phase B.** Single source of truth — re-read that skill's Phase B section, **including the autodrive arming** (write `.m_plan/<slug>/.run.json` before the walk so the `plan_completion_driver` Stop hook drives to a clean `09`, and delete it when you emit the Phase 3 report). Summary:
+**Execution semantics are identical to `m_plan_implement` Phase B.** Single source of truth — re-read that skill's Phase B section. Summary:
 - Walk `05_step_plan.md` in dependency order. Per-step check → flip `V-STEP-Sxx` via `Edit`. Retry once on failure; second failure → `[!]` + stop.
 - After steps: build → test → (if `08`) e2e → (if `06` and user types `deploy`) walk `06` like steps walk `05`.
 - **Log every deviation from `01–08` immediately** under `## Deviations` in `09` — do not reconstruct at end.
@@ -82,7 +82,7 @@ After writing, list paths + one-line summary each. **If any `V-READY-*` is `[!]`
 
 ## Phase 3 — Final report
 
-When execution stops (success or partial), **delete `.m_plan/<slug>/.run.json` to disarm autodrive**, then re-read `09_verification.md` from disk (including `## Deviations`) and emit:
+When execution stops (success or partial), re-read `09_verification.md` from disk (including `## Deviations`) and emit:
 ```
 Changed: <files touched, grouped>
 Verification: <commands + results>
