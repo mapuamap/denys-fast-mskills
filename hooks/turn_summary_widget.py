@@ -2,25 +2,23 @@
 """
 End-of-turn summary hook (Stop).
 
-The branded in-chat WIDGET (logo + stats card) was REMOVED at the owner's
-request (v2.11.0). The plain-text summary it used to sit above is KEPT. What
-the hook does now:
+The branded in-chat WIDGET (logo + stats card) was removed at the owner's
+request (v2.11.0), and the plain-text «Что дальше»/«Задача» summary blocks were
+removed too (v2.14.0) — the owner disliked the "what's done / what's next"
+recap. What the hook does now:
   * a lightweight one-line ANSI systemMessage with the turn's token/cost stats
     (shown on every non-empty turn);
-  * on real-work turns, a decision:block asking the assistant to write two
-    plain-text blocks — «Что дальше» (what was done + next step) and «Задача»
-    (one-sentence restatement of the user's request). NO widget / show_widget.
-  * on code-change turns, the silent .m_verify ledger feed is appended to that
-    same block reason (file IO only, nothing extra in chat).
+  * on code-change turns only, the silent .m_verify ledger feed via a
+    decision:block whose reason is JUST that file-only instruction (no widget,
+    no summary text). This is the sole remaining use of decision:block.
 
 Flow per turn:
   1. Turn ends -> this Stop hook fires (stop_hook_active = false).
   2. We parse the transcript for THIS turn's metrics (tokens, cost, time).
-  3. Real work this turn -> emit {"decision":"block","reason": <text blocks
-     (+ silent ledger if code changed)>} + the one-line systemMessage.
-     Trivial turn -> just the one-liner, no block.
-  4. The assistant takes one more turn, writes the text blocks (and silently
-     upserts the ledger on code-change turns), then stops.
+  3. Code changed this turn -> emit {"decision":"block","reason": <silent ledger
+     instruction>} + the one-line systemMessage. Otherwise just the one-liner.
+  4. (code-change turn) the assistant takes one more turn, upserts the ledger
+     file silently, then stops.
   5. Stop fires again with stop_hook_active = true -> we exit silently. No loop.
 
 FAIL-OPEN: any error -> exit 0 with no output, so a bug here can never trap
@@ -31,7 +29,6 @@ from datetime import datetime
 
 # --- tunables (env-overridable) ---------------------------------------------
 MIN_TOOLS_FOR_WIDGET = int(os.environ.get("CLAUDE_WIDGET_MIN_TOOLS", "2"))
-MAX_PROMPT_CHARS = 600  # cap on the rephrase source fed into the «Задача» block
 REASON_CHAR_CAP = 9500  # hook output strings are capped at 10k
 
 # m_verify ledger: code-change turns get a silent instruction to upsert
@@ -272,17 +269,19 @@ def one_line_summary(project, tk, total, cost, dur):
     )
 
 
-def ledger_block(ledger_path, today):
-    """Silent step: upsert features-awaiting-verification into the ledger. Only
-    appended on turns where code actually changed. File IO only — nothing in chat.
+def build_ledger_reason(ledger_path, today):
+    """Silent step (the ONLY decision:block use left): upsert features-awaiting-
+    verification into the ledger. Used only on turns where code actually changed.
+    File IO only — NOTHING in chat (no widget, no summary text).
 
     Compact form: one-line-per-field template instead of a fenced schema dump,
-    to keep this block (re-sent every code-change turn) small in context. The
+    to keep this reason (re-sent every code-change turn) small in context. The
     produced file format is unchanged — same header, same English field names,
     same `schema:1` — so the contract with skills/m_verify/SKILL.md still holds."""
     p = ledger_path.replace("\\", "/")
-    return (
-        "\n\n3) ТИХИЙ шаг — ТОЛЬКО файл, НИ строчки в чат. В этом ходу менялся код → обнови ledger "
+    reason = (
+        "[end-of-turn ledger hook] ТИХИЙ шаг — ТОЛЬКО файл, НИ строчки в чат, "
+        "НИКАКИХ виджетов и НИКАКИХ блоков-саммари. В этом ходу менялся код → обнови ledger "
         f"фич на проверку: «{p}». Для КАЖДОЙ реально сделанной проверяемой вещи — upsert одной "
         "секции `## `; идентичность по полю key (не дублируй; при нужде обнови поля). Имена полей "
         "пиши РОВНО так (англ.), значения — на рабочем языке:\n"
@@ -291,27 +290,8 @@ def ledger_block(ledger_path, today):
         f"`- added: {today}` · `- evidence:` · `- repair_task:`\n"
         "Файл/папку создай, если их нет, с шапкой `# m_verify ledger — features awaiting "
         "verification` и строкой `<!-- schema:1 -->`. Бери ТОЛЬКО сделанное в этом ходу, ничего не "
-        "выдумывай; никаких секретов/токенов/прод-хостов. Нечего проверять — НИЧЕГО не пиши."
-    )
-
-
-def build_reason(last_prompt, ledger_path=None, today=""):
-    """Real-work turns: two plain-text blocks (NO widget, NO show_widget) —
-    «Что дальше» + «Задача» — and, on code-change turns, the silent ledger step.
-    The branded logo widget was removed in v2.11.0; the text summary is kept."""
-    prompt = (last_prompt or "").replace("\n", " ").strip()[:MAX_PROMPT_CHARS]
-    reason = (
-        "[end-of-turn summary hook] Обычным форматированным ТЕКСТОМ (НИКАКИХ виджетов, "
-        "НЕ вызывай show_widget) сделай по порядку:\n\n"
-        "1) Блок «Что дальше» — заголовок и 1–3 коротких пункта: что сделал в этом ходу "
-        "и логичный следующий шаг.\n\n"
-        "2) В САМОМ КОНЦЕ блок «Задача» — ОДНО предложение: суть того, что я просил "
-        f"(НЕ дословно). Источник для перефраза (не цитируй целиком): «{prompt}»"
-    )
-    if ledger_path:
-        reason += ledger_block(ledger_path, today)
-    reason += "\n\nКроме этих блоков в чат больше ничего не выводи" + (
-        " (шаг 3 пишет ТОЛЬКО в файл, в чат — ничего)." if ledger_path else "."
+        "выдумывай; никаких секретов/токенов/прод-хостов. Нечего проверять — НИЧЕГО не пиши. "
+        "В ЧАТ больше ничего не выводи (этот шаг пишет ТОЛЬКО в файл)."
     )
     return reason[:REASON_CHAR_CAP]
 
@@ -345,25 +325,25 @@ def main():
     dur_human = fmt_duration(turn["duration_seconds"])
     one_liner = one_line_summary(project, tk, total, cost, dur_human)
 
-    # Widget removed (v2.11.0): real-work turns still take one more turn to write
-    # the plain-text «Что дальше» + «Задача» blocks; code-change turns also get the
-    # silent .m_verify ledger feed. Trivial turns get only the one-line stats.
+    # Widget removed (v2.11.0); «Что дальше»/«Задача» summary blocks removed
+    # (v2.14.0). The ONLY remaining decision:block is the silent .m_verify ledger
+    # feed on real-work turns where code changed. Every other turn is just the
+    # one-line stats systemMessage, no block.
     real_work = turn["tools_total"] >= MIN_TOOLS_FOR_WIDGET
+    code_changed = any(t in turn["tools_by_name"] for t in CODE_TOOLS)
 
-    if not real_work:
+    if real_work and code_changed and cwd:
+        ledger_path = os.path.join(cwd, LEDGER_REL)
+        today = datetime.now().strftime("%Y-%m-%d")
         print(json.dumps({
+            "decision": "block",
+            "reason": build_ledger_reason(ledger_path, today),
             "systemMessage": one_liner,
             "suppressOutput": True,
         }))
         return
 
-    code_changed = any(t in turn["tools_by_name"] for t in CODE_TOOLS)
-    ledger_path = os.path.join(cwd, LEDGER_REL) if (cwd and code_changed) else None
-    today = datetime.now().strftime("%Y-%m-%d")
-
     print(json.dumps({
-        "decision": "block",
-        "reason": build_reason(turn["last_prompt"], ledger_path, today),
         "systemMessage": one_liner,
         "suppressOutput": True,
     }))  # ensure_ascii=True -> pure-ASCII output, encoding-safe for any consumer
