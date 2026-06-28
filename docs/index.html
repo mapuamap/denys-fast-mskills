@@ -420,9 +420,6 @@ var DATA=[
   {kind:'skill',cat:'code',icon:'shield-check',cmd:'/m_code_rules_audit',
    en:{tag:'Audit against your rules',desc:'Checks code against the rules in your repo plus safe checks. Report-only; pairs with /code-review.'},
    ru:{tag:'Аудит по твоим правилам',desc:'Проверяет код по правилам твоего репозитория и безопасным проверкам. Только отчёт; в пару к /code-review.'}},
-  {kind:'skill',cat:'code',icon:'badge-check',cmd:'/m_verify',
-   en:{tag:'Verify what was built',desc:'Manages features that shipped but need sign-off: auto-checks what AI can, gives you a short human checklist, and fixes failures with background agents.'},
-   ru:{tag:'Проверить сделанное',desc:'Ведёт фичи, которые реализованы, но не подтверждены: что может — проверяет сам, остальное даёт коротким чек-листом тебе, а поломки чинит фоновыми агентами.'}},
   {kind:'command',cat:'infra',icon:'settings-2',cmd:'/m_setup',
    en:{tag:'Install the m_code framework',desc:'Drops rules, hooks and ai-check.sh into the current repo. Once per project.'},
    ru:{tag:'Установить m_code-фреймворк',desc:'Кладёт правила, хуки и ai-check.sh в репозиторий. Один раз на проект.'}},
@@ -455,10 +452,7 @@ var DATA=[
    ru:{tag:'Прогон проверок',desc:'Гоняет build/test/lint изолированно и отдаёт короткий pass/fail.'}},
   {kind:'agent',cat:'agent',icon:'layers',cmd:'m_code_architecture_reviewer',
    en:{tag:'Independent boundary review',desc:'A second pass on dependencies, seams and coupling after big changes.'},
-   ru:{tag:'Ревью границ',desc:'Второй взгляд на зависимости, швы и связанность после крупных правок.'}},
-  {kind:'agent',cat:'agent',icon:'hammer',cmd:'m_verify-repair',
-   en:{tag:'Background feature repair',desc:'Fixes one failed verification item in isolation, re-runs the check, and reports back. Launched by /m_verify; never commits.'},
-   ru:{tag:'Фоновый ремонт фич',desc:'Чинит одну непройденную проверку изолированно, перепрогоняет её и отчитывается. Запускается из /m_verify; не коммитит.'}}
+   ru:{tag:'Ревью границ',desc:'Второй взгляд на зависимости, швы и связанность после крупных правок.'}}
 ];
 
 var GROUPS=[

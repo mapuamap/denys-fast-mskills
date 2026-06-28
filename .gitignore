@@ -10,7 +10,6 @@ __pycache__/
 # Claude Code transient state (only relevant if this repo is itself used as a project)
 .claude/state/
 .m_plan/
-.m_verify/
 .claude/launch.json
 CLAUDE.md.pre-reorg.bak
 mptest/
